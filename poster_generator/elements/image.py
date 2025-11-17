@@ -1,8 +1,8 @@
 from PIL import Image
-from .element import CanvasElement
+from .element import AbstractDrawableElement
 import colorsys
 
-class ImageElement(CanvasElement):
+class ImageElement(AbstractDrawableElement):
     def __init__(self, image_path=None, position=None, size=None):
         self.image_path = image_path
         self.position = position

@@ -1,0 +1,49 @@
+schema: "1.0"
+
+settings:
+  canvas_size: [400, 300]
+  background_color: "#000000"
+
+variables:
+  title_text: "Sample Poster"
+
+output:
+  format: "png"
+  path: "output/grid_poster.png"
+
+layers:
+  - id: 0
+    opacity: 1.0
+    elements:
+      - identifier: "bg1"
+        type: "image"
+        group: "backgrounds"
+        position: [0, 0]
+        operations:
+          poster_generator:hue_shift:
+            degrees: 180
+        values:
+          path: "assets/background1.jpg"
+          size: [400, 300]
+
+      - identifier: "title1"
+        type: "text"
+        frame: "top-left"
+        anchor:
+          frame: "top-left"
+          rel_position: [-50, 20]
+        values:
+          text: "--${title_text}--"
+          font_size: 32
+          color: "#FFFFFF"
+
+      - identifier: "subtitle1"
+        type: "text"
+        frame: "top-left"
+        anchor:
+          element: "title1"
+          rel_position: [0, 20]
+        values:
+          text: "My subtitle :)"
+          font_size: 24
+          color: "#FFFFFF"

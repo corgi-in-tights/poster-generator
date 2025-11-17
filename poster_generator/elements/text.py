@@ -1,13 +1,13 @@
 from PIL import ImageFont
 from typing import TYPE_CHECKING
-from .element import CanvasElement
+from .element import AbstractDrawableElement
 from poster_generator.settings import DEFAULT_FONT
 
 if TYPE_CHECKING:
     from PIL import ImageDraw
 
 
-class TextElement(CanvasElement):
+class TextElement(AbstractDrawableElement):
     def __init__(self, text=None, font_path=None, font_size=20, color="#000", position=None):
         self.text = text
         self.font_path = font_path or DEFAULT_FONT
