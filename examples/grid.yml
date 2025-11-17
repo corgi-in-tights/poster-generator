@@ -4,45 +4,48 @@ settings:
   canvas_size: [400, 300]
   background_color: "#000000"
 
+anchors:
+  river: [350, 275]
 variables:
-  title_text: "Sample Poster"
-
-output:
-  format: "png"
-  path: "output/grid_poster.png"
+  title_text:
+    type: string
+  hue_shift:
+    type: number
+    default: 0
 
 layers:
-  - id: 0
+  background:
     opacity: 1.0
     elements:
-      - identifier: "bg1"
+      full_bg:
         type: "image"
-        group: "backgrounds"
         position: [0, 0]
         operations:
-          poster_generator:hue_shift:
-            degrees: 180
+          hue_shift:
+            degrees: "--${hue_shift}--"
         values:
           path: "assets/background1.jpg"
           size: [400, 300]
 
-      - identifier: "title1"
+      title1:
         type: "text"
-        frame: "top-left"
-        anchor:
-          frame: "top-left"
-          rel_position: [-50, 20]
+        groups: [top-left, headers]
+        rel_position: 
+          source: "anchor"
+          id: "top-left"
+          offset: [20, 20]
         values:
           text: "--${title_text}--"
           font_size: 32
           color: "#FFFFFF"
 
-      - identifier: "subtitle1"
+      subtitle1:
         type: "text"
-        frame: "top-left"
-        anchor:
-          element: "title1"
-          rel_position: [0, 20]
+        groups: [top-left, subheaders]
+        rel_position: 
+          source: "element"
+          id: "title1"
+          offset: [20, 20]
         values:
           text: "My subtitle :)"
           font_size: 24
