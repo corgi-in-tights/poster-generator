@@ -18,10 +18,13 @@ class Canvas:
             raise ValueError(f"Element with identifier '{identifier}' already exists.")
         self._elements[identifier] = element
 
-    def render(self):
+    def render(self, global_op=None):
         for k, e in self._elements.items():
             if e.is_ready():
+                if global_op is not None:
+                    global_op(e)
                 e.draw(self._draw, self._image)
+                
             else:
                 logger.warning(f"Element '{k}' is not ready and will be skipped.")
                
