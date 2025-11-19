@@ -8,6 +8,26 @@ logger = get_logger()
 
 
 class Canvas:
+    """
+    A canvas for creating and managing poster elements with layers and groups.
+
+    The Canvas class provides a flexible system for organizing drawable elements
+    into layers and groups, with support for selective rendering and element queries.
+
+    Args:
+        width: Canvas width in pixels. Defaults to 1080.
+        height: Canvas height in pixels. Defaults to 1350.
+        background: Background color as hex string (e.g., "#fff"). Defaults to "#fff".
+
+    Attributes:
+        width: Canvas width in pixels.
+        height: Canvas height in pixels.
+        background: Background color.
+        elements: Dictionary mapping element identifiers to element instances.
+        layers: Dictionary of layers, each containing settings and element lists.
+        groups: Dictionary of groups, each containing a set of element identifiers.
+    """
+
     def __init__(self, width=1080, height=1350, background="#fff"):
         self.width = width
         self.height = height
@@ -26,8 +46,22 @@ class Canvas:
         self._draw = ImageDraw.Draw(self._image)
 
     def add_element(self, identifier, element, groups=None, layer="default"):
-        logger.debug(f"CANVAS: Adding element '{identifier}' to layer '{layer}' and groups {groups}")
-        
+        """
+        Add an element to the canvas with optional layer and group membership.
+
+        Args:
+            identifier: Unique string identifier for the element.
+            element: DrawableElement instance to add.
+            groups: Optional list of group names this element belongs to.
+            layer: Layer name to add the element to. Defaults to "default".
+
+        Raises:
+            ValueError: If an element with the same identifier already exists.
+        """
+        logger.debug(
+            f"CANVAS: Adding element '{identifier}' to layer '{layer}' and groups {groups}"
+        )
+
         if identifier in self.elements:
             raise ValueError(f"Element with identifier '{identifier}' already exists.")
 
@@ -49,10 +83,21 @@ class Canvas:
             self.groups[group].add(identifier)
 
     def remove_element(self, identifier):
+        """
+        Remove a single element from the canvas.
+
+        Args:
+            identifier: The unique identifier of the element to remove.
+        """
         self.remove_elements([identifier])
 
     def remove_elements(self, identifiers):
-        """Remove multiple elements from registry + all indexes."""
+        """
+        Remove multiple elements from the canvas registry and from all layers/groups.
+
+        Args:
+            identifiers: List of element identifiers to remove.
+        """
         for identifier in identifiers:
             # Remove from element registry
             self.elements.pop(identifier, None)
@@ -66,12 +111,24 @@ class Canvas:
                 element_ids.discard(identifier)  # safe, no error
 
     def clear_layer(self, layer):
+        """
+        Remove all elements from a layer and delete the layer.
+
+        Args:
+            layer: Name of the layer to clear.
+        """
         if layer in self.layers:
             identifiers = self.layers[layer]["elements"].copy()
             self.remove_elements(identifiers)
             del self.layers[layer]
 
     def clear_group(self, group):
+        """
+        Remove all elements from a group and delete the group.
+
+        Args:
+            group: Name of the group to clear.
+        """
         if group in self.groups:
             identifiers = list(self.groups[group])  # copy
             self.remove_elements(identifiers)
@@ -81,13 +138,21 @@ class Canvas:
         self, *, identifiers=None, groups=None, layers=None, require_all=False
     ):
         """
-        Flexible query system.
-        Returns element *instances* matching ANY or ALL filters.
+        Query and retrieve elements by identifiers, groups, or layers.
 
-        identifiers: str or list[str]
-        groups: str or list[str]
-        layers: str or list[str]
-        require_all: if True, element must match ALL conditions instead of ANY
+        Returns element instances matching the specified filters. By default, elements
+        matching ANY condition are returned. Set require_all=True to return only elements
+        matching ALL conditions.
+
+        Args:
+            identifiers: Single identifier (str) or list of identifiers to match.
+            groups: Single group name (str) or list of group names to match.
+            layers: Single layer name (str) or list of layer names to match.
+            require_all: If True, elements must match ALL conditions. If False (default),
+                        elements matching ANY condition are returned.
+
+        Returns:
+            List of DrawableElement instances matching the query criteria.
         """
 
         id_filter = self._norm_set(identifiers)
@@ -120,33 +185,6 @@ class Canvas:
 
         return results
 
-    def render(self, global_op=None):
-        for layer_name, layer_info in self.layers.items():
-            self._render_layer(layer_name, layer_info, global_op)
-        return self._image
-
-    def _render_layer(self, layer_name, layer_info, global_op=None):
-        # TODO: apply layer settings
-
-        for identifier in layer_info["elements"]:
-            e = self.elements.get(identifier)
-            if e is None:
-                logger.error(
-                    f"Element '{identifier}' listed in layer {layer_name} not found in registry."
-                )
-                continue
-            
-            if e.is_ready():
-                if global_op is not None:
-                    global_op(e)
-                    
-                logger.debug("CANVAS: Drawing element '%s' in layer '%s'", identifier, layer_name)
-                e.draw(self._draw, self._image)
-            else:
-                logger.error(
-                    f"Element '{identifier}' in layer {layer_name} is not ready and will be skipped."
-                )
-
     # helpers
     def _norm_set(self, value):
         if value is None:
@@ -155,17 +193,70 @@ class Canvas:
             return {value}
         return set(value)
 
+    def render(self, global_op=None):
+        """
+        Render all layers and elements to create the final image.
+
+        Args:
+            global_op: Optional callable to apply to each element before rendering.
+                      Should accept an element instance as its argument.
+
+        Returns:
+            PIL.Image.Image: The rendered image.
+        """
+        for layer_name, layer_info in self.layers.items():
+            self._render_layer(layer_name, layer_info, global_op)
+        return self._image
+
+    def _render_layer(self, layer_name, layer_info, global_op=None):
+        layer_settings = layer_info["settings"]
+        opacity = layer_settings.get("opacity", 1.0)
+
+        for identifier in layer_info["elements"]:
+            e = self.elements.get(identifier)
+            if e is None:
+                logger.error(
+                    f"Element '{identifier}' listed in layer {layer_name} not found in registry."
+                )
+                continue
+
+            if e.is_ready():
+                if global_op is not None:
+                    global_op(e)
+
+                logger.debug(
+                    "CANVAS: Drawing element '%s' in layer '%s'", identifier, layer_name
+                )
+                e.draw(self._draw, self._image, opacity=opacity)
+            else:
+                logger.error(
+                    f"Element '{identifier}' in layer {layer_name} is not ready and will be skipped."
+                )
+
     def populate_layer_by_info(self, name: str, layer_info: dict):
         """
-        layer_dict structure:
-        {
-            "opacity": 1.0,
-            "elements": {
-                "full_bg": {...},
-                "title1": {...},
-                "subtitle1": {...}
-            }
-        }
+        Populate a layer with elements from a structured dictionary.
+
+        Creates elements from the provided layer information and adds them to the canvas.
+        The layer_info dictionary should contain settings (e.g., opacity) and an elements
+        dictionary with element configurations.
+
+        Args:
+            name: Name of the layer to populate.
+            layer_info: Dictionary containing layer configuration with structure:
+                {
+                    "opacity": 1.0,
+                    "elements": {
+                        "element_id": {
+                            "type": "text",
+                            "position": (x, y),
+                            "values": {...},
+                            "operations": {...},
+                            "groups": [...]
+                        },
+                        ...
+                    }
+                }
         """
         logger.debug(f"CANVAS: Populating layer '{name}' with elements")
 
@@ -191,40 +282,61 @@ class Canvas:
 
     def _build_element(self, element_info: dict):
         """
-        Convert YAML dict → Element instance.
-        Replace this with your real Element classes.
+        Convert YAML dict into an Element instance.
+
+        Format:
+        {
+            "type": "text",
+            "position": (x, y),
+            "values": {...},
+            optional "operations": {...}
+        }
         """
         element_type = element_info.get("type")
-        
+
         element = get_factory().create_element(
             element_type,
             position=element_info.get("position"),
             values=element_info.get("values", {}),
         )
-        
+
         # apply operations
         operations = element_info.get("operations", {})
         factory = get_operation_factory()
-        
+
         for op_name, op_params in operations.items():
             op_entry = factory.get_operation(op_name)
             if op_entry is None:
                 logger.error(f"Operation '{op_name}' not found in factory.")
                 continue
-            
-            if element_type not in op_entry["supported_types"]:
-                logger.error(f"Operation '{op_name}' not supported for element type '{element_type}'.")
-                continue
-            
-            operation = op_entry["func"]
-            
-            element.apply_operation(lambda img, op=operation, params=op_params: op(img, **params))
 
-        
+            if element_type not in op_entry["supported_types"]:
+                logger.error(
+                    f"Operation '{op_name}' not supported for element type '{element_type}'."
+                )
+                continue
+
+            operation = op_entry["func"]
+            element.apply_operation(
+                lambda img, op=operation, params=op_params: op(img, **params)
+            )
+
         return element
-        
+
     @staticmethod
     def from_dict(data: dict) -> "Canvas":
+        """
+        Create a Canvas instance from a dictionary configuration.
+
+        Args:
+            data: Dictionary containing canvas settings with optional keys:
+                  - width: Canvas width in pixels (default: 1080)
+                  - height: Canvas height in pixels (default: 1350)
+                  - background: Background color as hex string (default: "#fff")
+
+        Returns:
+            Canvas: A new Canvas instance configured with the provided settings.
+        """
         width = data.get("width", 1080)
         height = data.get("height", 1350)
         background = data.get("background", "#fff")

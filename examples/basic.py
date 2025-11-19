@@ -3,33 +3,30 @@ from poster_generator import Canvas, TextElement, ImageElement
 from poster_generator.operations.image import apply_hue_shift
 
 SIZE = (1080, 1350)
-CWD = Path(__file__).parent
-
-def abspath(s):
-    return CWD / s
 
 if __name__ == "__main__":
-    canvas = Canvas(width=SIZE[0], height=SIZE[1], background="#ffffff")
+    canvas = Canvas(width=SIZE[0], height=SIZE[1], background="#c75d5d")
 
     background = ImageElement(
-        image_path=abspath("bg.png"),
-        position=(0, 0),
-        size=SIZE
+        (0, 0),
+        image_path=Path.cwd() / "examples/assets/bg.png",
+        width=SIZE[0],
+        height=SIZE[1],
     )
     background.apply_operation(lambda img: apply_hue_shift(img, 30))
-    
+
     canvas.add_element("background", background)
 
-
     text_element = TextElement(
+        (50, 50),
         text="Hello, Poster!",
         font_size=200,
-        color="#333333", 
-        position=(50, 50)
+        color="#333333",
     )
     canvas.add_element("title", text_element)
 
+    # canvas.remove_element("title")
 
     image = canvas.render()
     image.show()
-    image.save(abspath("output.png"))
+    # image.save(abspath("output.png"))

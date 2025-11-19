@@ -10,7 +10,8 @@ anchors:
     y: 275
 layers:
   background:
-    opacity: 1
+    settings:
+      opacity: 1
     elements:
       full_bg:
         type: image

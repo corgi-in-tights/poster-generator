@@ -1,19 +1,48 @@
+"""YAML-based canvas configuration loader."""
+
 import yaml
 
 from .base import CanvasLoader
 
 
 class YamlLoader(CanvasLoader):
+    """
+    Canvas loader for YAML configuration files.
+    
+    Supports variable substitution using the format: --${variable_name}--
+    
+    Attributes:
+        SCHEMA_VERSION: Supported (latest) schema version for YAML files.
+    """
+    
     SCHEMA_VERSION = "1.0"
 
     def _read_source(self, path: str) -> dict:
-        """Load YAML into a dict."""
+        """
+        Load and parse a YAML file.
+        
+        Args:
+            path: Path to the YAML file.
+        
+        Returns:
+            dict: Parsed YAML data.
+        """
         with open(path, "r") as f:
             return yaml.safe_load(f)
 
     def deserialize(self, raw_data: dict, variables: dict) -> dict:
         """
-        Deserialize a raw YAML dict into a normalized internal canvas model.
+        Deserialize YAML data into a normalized canvas configuration.
+        
+        Args:
+            raw_data: Raw YAML data as a dictionary.
+            variables: Dictionary for variable substitution.
+        
+        Returns:
+            dict: Normalized configuration with settings, anchors, and layers.
+        
+        Raises:
+            ValueError: If the schema version is unsupported.
         """
         schema = raw_data.get("schema", YamlLoader.SCHEMA_VERSION)
         if schema != YamlLoader.SCHEMA_VERSION:
