@@ -1,12 +1,13 @@
 from PIL import Image
-from .abstract import AbstractDrawableElement
+from .drawable import DrawableElement
 import colorsys
 
-class ImageElement(AbstractDrawableElement):
-    def __init__(self, image_path=None, position=None, size=None):
+class ImageElement(DrawableElement):
+    def __init__(self, position, image_path=None, width=None, height=None):
+        super().__init__(position)
         self.image_path = image_path
-        self.position = position
-        self.size = size
+        self.width = width
+        self.height = height
         self.image = None
         if image_path:
             self.load_image(image_path)
@@ -16,8 +17,8 @@ class ImageElement(AbstractDrawableElement):
         self.image_path = image_path
         self.image = Image.open(image_path).convert("RGBA")
     
-        if self.size:
-            self.image = self.image.resize(self.size)
+        if self.width or self.height:
+            self.image = self.image.resize((self.width, self.height))
 
     def apply_hue_shift(self, degrees: float):
         img = self.image.convert("RGBA")
@@ -70,12 +71,13 @@ class ImageElement(AbstractDrawableElement):
                 )
         
     
-    def draw(self, draw, canvas_image, position=None):
+    def draw(self, image_draw, canvas_image, position=None):
         position = position if position else self.position if self.position else None
         if position is None:
             raise ValueError("Position must be specified to draw the image element as (x, y).")
         
-        pos2 = (position[0] + self.size[0], position[1] + self.size[1])
+        pos2 = (position[0] + self.width if self.width else 0, 
+                position[1] + self.height if self.height else 0)
         
         if self.image is None:
             raise ValueError("No image loaded to draw.")
@@ -88,3 +90,7 @@ class ImageElement(AbstractDrawableElement):
         
     def is_ready(self):
         return self.image is not None
+
+    def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
+        return False
+    

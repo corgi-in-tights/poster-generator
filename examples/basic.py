@@ -1,7 +1,6 @@
 from pathlib import Path
 from poster_generator import Canvas, TextElement, ImageElement
 from poster_generator.operations.image import apply_hue_shift
-from poster_generator.loaders import YamlLoader
 
 SIZE = (1080, 1350)
 CWD = Path(__file__).parent
@@ -10,7 +9,7 @@ def abspath(s):
     return CWD / s
 
 if __name__ == "__main__":
-    canvas = Canvas(size=SIZE, background="#ffffff")
+    canvas = Canvas(width=SIZE[0], height=SIZE[1], background="#ffffff")
 
     background = ImageElement(
         image_path=abspath("bg.png"),

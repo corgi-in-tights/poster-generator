@@ -1,5 +1,10 @@
 from abc import ABC, abstractmethod
 
+from poster_generator import Canvas
+from ..settings import get_logger
+
+logger = get_logger()
+
 class CanvasLoader(ABC):
     """
     Abstract format-agnostic loader.
@@ -15,15 +20,19 @@ class CanvasLoader(ABC):
             - variables: optional dict for placeholder substitution
         """
         raw_data = self.preprocess(self._prepare_source(source), variables or {})
+
+        pre_canvas_data = self.deserialize(raw_data, variables or {})
+
+        canvas_data = self.postprocess(pre_canvas_data, variables or {})
         
-        canvas = self.deserialize_canvas(raw_data, variables or {})
+        logger.debug("CANVAS LOADER: Loaded data %r", canvas_data)
 
-        return self.postprocess(canvas, variables or {})
+        canvas = Canvas.from_dict(canvas_data["settings"])
 
+        for layer_name, layer_info in canvas_data["layers"].items():
+            canvas.populate_layer_by_info(layer_name, layer_info)
 
-    # ------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------
+        return canvas
 
     def _prepare_source(self, source):
         """
@@ -43,7 +52,7 @@ class CanvasLoader(ABC):
         pass
 
     @abstractmethod
-    def deserialize_canvas(self, raw_data: dict, variables: dict) -> dict:
+    def deserialize(self, raw_data: dict, variables: dict) -> dict:
         """Format-agnostic normalization step."""
         pass
 

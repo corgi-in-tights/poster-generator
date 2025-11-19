@@ -1,9 +1,9 @@
 ---
 schema: "1.0"
 settings:
-  width: 400
-  height: 300
-  background_color: "#000000"
+  width: 1080
+  height: 1350
+  background_color: "#f295df"
 anchors:
   river:
     x: 350
@@ -21,9 +21,9 @@ layers:
           hue_shift:
             degrees: --${hue_shift}--
         values:
-          path: assets/background1.jpg
-          width: 400
-          height: 300
+          image_path: --${background_image}--
+          width: 1080
+          height: 1350
       title1:
         type: text
         groups:
@@ -48,7 +48,7 @@ layers:
           source: element
           id: title1
           offset:
-            x: 20
+            x: 0
             y: 30
         values:
           text: My subtitle :)

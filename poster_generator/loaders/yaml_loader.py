@@ -11,7 +11,7 @@ class YamlLoader(CanvasLoader):
         with open(path, "r") as f:
             return yaml.safe_load(f)
 
-    def deserialize_canvas(self, raw_data: dict, variables: dict) -> dict:
+    def deserialize(self, raw_data: dict, variables: dict) -> dict:
         """
         Deserialize a raw YAML dict into a normalized internal canvas model.
         """
@@ -26,14 +26,14 @@ class YamlLoader(CanvasLoader):
         self._variables = variables
             
         settings = self._deserialize_settings(raw_data)
+        # anchors are a high-level loader construct for positioning
         anchors = self._deserialize_anchors(raw_data)
         layers = self._deserialize_layers(raw_data, anchors)
-
+    
         self._variables = None
         
         return {
             "settings": settings,
-            "anchors": anchors,
             "layers": layers,
         }
         

@@ -1,9 +1,11 @@
-from .text import AbstractDrawableElement
+from .drawable import DrawableElement
 from .text import TextElement
 from .image import ImageElement
+from .factory import get_factory
 
 __all__ = [
-    "AbstractDrawableElement",
+    "DrawableElement",
     "TextElement",
     "ImageElement",
+    "get_factory",
 ]
