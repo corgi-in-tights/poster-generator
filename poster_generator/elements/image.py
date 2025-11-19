@@ -1,5 +1,5 @@
 from PIL import Image
-from .element import AbstractDrawableElement
+from .abstract import AbstractDrawableElement
 import colorsys
 
 class ImageElement(AbstractDrawableElement):

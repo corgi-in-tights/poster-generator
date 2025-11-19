@@ -1,6 +1,7 @@
 from pathlib import Path
 from poster_generator import Canvas, TextElement, ImageElement
 from poster_generator.operations.image import apply_hue_shift
+from poster_generator.loaders import YamlLoader
 
 SIZE = (1080, 1350)
 CWD = Path(__file__).parent

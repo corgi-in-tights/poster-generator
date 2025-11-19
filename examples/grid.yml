@@ -1,52 +1,56 @@
+---
 schema: "1.0"
-
 settings:
-  canvas_size: [400, 300]
+  width: 400
+  height: 300
   background_color: "#000000"
-
 anchors:
-  river: [350, 275]
-variables:
-  title_text:
-    type: string
-  hue_shift:
-    type: number
-    default: 0
-
+  river:
+    x: 350
+    y: 275
 layers:
   background:
-    opacity: 1.0
+    opacity: 1
     elements:
       full_bg:
-        type: "image"
-        position: [0, 0]
+        type: image
+        position:
+          x: 0
+          y: 0
         operations:
           hue_shift:
-            degrees: "--${hue_shift}--"
+            degrees: --${hue_shift}--
         values:
-          path: "assets/background1.jpg"
-          size: [400, 300]
-
+          path: assets/background1.jpg
+          width: 400
+          height: 300
       title1:
-        type: "text"
-        groups: [top-left, headers]
-        rel_position: 
-          source: "anchor"
-          id: "top-left"
-          offset: [20, 20]
+        type: text
+        groups:
+          - top-left
+          - headers
+        rel_position:
+          source: anchor
+          id: river
+          offset:
+            x: 20
+            y: 20
         values:
-          text: "--${title_text}--"
+          text: --${title_text}--
           font_size: 32
           color: "#FFFFFF"
-
       subtitle1:
-        type: "text"
-        groups: [top-left, subheaders]
-        rel_position: 
-          source: "element"
-          id: "title1"
-          offset: [20, 20]
+        type: text
+        groups:
+          - top-left
+          - subheaders
+        rel_position:
+          source: element
+          id: title1
+          offset:
+            x: 20
+            y: 30
         values:
-          text: "My subtitle :)"
+          text: My subtitle :)
           font_size: 24
           color: "#FFFFFF"

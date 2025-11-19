@@ -1,6 +1,6 @@
 from PIL import ImageFont
 from typing import TYPE_CHECKING
-from .element import AbstractDrawableElement
+from .abstract import AbstractDrawableElement
 from poster_generator.settings import DEFAULT_FONT
 
 if TYPE_CHECKING:

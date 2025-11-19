@@ -101,3 +101,4 @@ class Canvas:
                     )
 
             return self._image
+
