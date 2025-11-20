@@ -20,12 +20,9 @@ repository = "https://github.com/corgi-in-tights/poster-generator"
 [tool.setuptools.packages.find]
 include = ["poster_generator", "poster_generator.*"]
 
-[tool.poetry]
-name = "poster-generator"
-version = "0.1.0"
-packages = [
-    { include = "poster_generator" }
-]
+[tool.poetry.group.dev.dependencies]
+twine = "^6.2.0"
+build = "^1.3.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.,<3.0.0"]
