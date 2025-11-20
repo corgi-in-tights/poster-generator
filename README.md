@@ -72,9 +72,9 @@ canvas.add_element("background", background)
 
 # Add text
 text = TextElement(
-    (50, 50),
+    (50, height//2 - 64),
     text="Hello, Poster!",
-    font_size=200,
+    font_size=64,
     color="#333333",
 )
 canvas.add_element("title", text)
@@ -397,25 +397,20 @@ poetry run python examples/yml.py
 ### Project Structure
 
 ```
-poster-generator/
-├── poster_generator/
-│   ├── __init__.py
-│   ├── canvas.py              # Canvas class
-│   ├── settings.py            # Library settings
-│   ├── elements/              # Element implementations
-│   │   ├── drawable.py        # Base element class
-│   │   ├── text.py            # Text element
-│   │   ├── image.py           # Image element
-│   │   └── factory.py         # Element factory
-│   ├── loaders/               # Template loaders
-│   │   ├── base.py            # Base loader
-│   │   └── yaml_loader.py     # YAML loader
-│   └── operations/            # Image operations
-│       ├── image.py           # Image transformations
-│       └── factory.py         # Operation factory
-├── examples/                  # Example scripts
-├── tests/                     # Test suite
-└── README.md
+poster_generator/
+├── ...
+├── canvas.py              # Canvas class
+├── elements/              # Element implementations
+│   ├── drawable.py        # Base element class
+│   ├── text.py            # Text element
+│   ├── image.py           # Image element
+│   └── factory.py         # Element factory
+├── loaders/               # Template loaders
+│   ├── base.py            # Base loader
+│   └── yaml_loader.py     # YAML loader
+└── operations/            # Image operations
+    ├── ...
+    └── factory.py         # Operation factory
 ```
 
 ## Contributing

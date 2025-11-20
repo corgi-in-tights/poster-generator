@@ -1,11 +1,11 @@
 """Base abstract loader for creating canvases from various data sources."""
 
 from abc import ABC, abstractmethod
+import logging
 
 from ..canvas import Canvas
-from ..settings import get_logger
 
-logger = get_logger()
+logger = logging.getLogger(__name__)
 
 class BaseCanvasLoader(ABC):
     """

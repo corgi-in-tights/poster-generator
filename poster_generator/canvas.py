@@ -1,11 +1,10 @@
+import logging
 from PIL import Image, ImageDraw
 
-from .settings import get_logger
 from .elements.factory import get_factory
 from .operations.factory import get_operation_factory
 
-logger = get_logger()
-
+logger = logging.getLogger(__name__)
 
 class Canvas:
     """

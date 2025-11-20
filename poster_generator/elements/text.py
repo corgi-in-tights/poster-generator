@@ -1,11 +1,12 @@
 from PIL import ImageFont
 from typing import TYPE_CHECKING
 from .drawable import DrawableElement
-from poster_generator.settings import DEFAULT_FONT
+from pathlib import Path
 
 if TYPE_CHECKING:
     from PIL import ImageDraw
 
+DEFAULT_FONT = Path(__file__).parent.parent / "resources/fonts/open_sans.ttf"
 
 class TextElement(DrawableElement):
     def __init__(self, position, text=None, font_path=None, font_size=20, color="#000"):
