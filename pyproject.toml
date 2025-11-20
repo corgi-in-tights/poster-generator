@@ -1,16 +1,24 @@
 [project]
 name = "poster-generator"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = [
     {name = "corgi-in-tights",email = "59304120+corgi-in-tights@users.noreply.github.com"}
 ]
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.13"
 dependencies = [
     "pillow (>=12.0.0,<13.0.0)",
     "pyyaml (>=6.0.3,<7.0.0)"
 ]
+
+[project.urls]
+homepage = "https://github.com/corgi-in-tights/poster-generator"
+repository = "https://github.com/corgi-in-tights/poster-generator"
+
+[tool.setuptools.packages.find]
+include = ["poster_generator", "poster_generator.*"]
 
 [tool.poetry]
 name = "poster-generator"
