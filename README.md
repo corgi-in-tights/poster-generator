@@ -333,14 +333,16 @@ rel_position:
 
 ### Canvas
 
-- `Canvas(width, height, background)` - Create a new canvas
-- `add_element(identifier, element, groups=None, layer="default")` - Add an element
-- `remove_element(identifier)` - Remove an element
-- `get_elements(identifiers=None, groups=None, layers=None, require_all=False)` - Query elements
-- `clear_layer(layer)` - Clear all elements from a layer
-- `clear_group(group)` - Clear all elements from a group
-- `render(global_op=None)` - Render the canvas to an image
-- `from_dict(data)` - Create canvas from dictionary
+- `Canvas(width, height, background)` - Create a new canvas with specified dimensions and background color
+- `add_element(identifier, element, groups=None, layer="default")` - Add an element to the canvas with a unique identifier, optional groups, and layer assignment
+- `remove_element(identifier)` - Remove an element from the canvas by its identifier
+- `get_elements(identifiers=None, groups=None, layers=None, require_all=False)` - Query and retrieve elements by identifiers, groups, or layers. Set `require_all=True` to match all criteria
+- `clear_layer(layer)` - Clear all elements from a specific layer
+- `clear_group(group)` - Clear all elements belonging to a specific group
+- `crop(x1, y1, x2, y2)` - Crop the canvas to the rectangular region defined by coordinates (x1, y1) as top-left and (x2, y2) as bottom-right
+- `align_element(identifier, x_align, y_align)` - Set an element's position to a specific canvas-based alignment (e.g., 'center', 'left', 'right', 'top', 'bottom')
+- `render(global_op=None)` - Render the canvas to an image, optionally applying global operations
+- `from_dict(data)` - Create and populate a canvas from a dictionary representation
 
 ### TextElement
 

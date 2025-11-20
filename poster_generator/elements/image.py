@@ -37,6 +37,9 @@ class ImageElement(DrawableElement):
         Raises:
             ValueError: If no position is specified or no image is loaded.
         """
+        if self.position is None:
+            raise ValueError("No position specified for ImageElement drawing.")
+        
         pos2 = (self.position[0] + self.width if self.width else 0, 
                 self.position[1] + self.height if self.height else 0)
         
@@ -75,3 +78,11 @@ class ImageElement(DrawableElement):
             self.position[1] <= y2 <= self.position[1] + (self.height or 0)
         )
     
+    def get_size(self):
+        """
+        Return the pixel width/height of the image element.
+        
+        Returns:
+            (width, height): Tuple of width and height in pixels.
+        """
+        return (self.width or 0, self.height or 0)

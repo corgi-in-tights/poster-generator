@@ -60,4 +60,13 @@ class DrawableElement(ABC):
     @abstractmethod
     def apply_operation(self, operation):
         pass
-        
+    
+    @abstractmethod
+    def get_size(self):
+        """
+        Return the pixel width/height of the drawable element.
+
+        Returns:
+            (width, height): Tuple of width and height in pixels.
+        """
+        pass

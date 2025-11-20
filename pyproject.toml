@@ -1,6 +1,6 @@
 [project]
 name = "poster-generator"
-version = "1.0.0"
+version = "1.1.0"
 description = ""
 authors = [
     {name = "corgi-in-tights",email = "59304120+corgi-in-tights@users.noreply.github.com"}

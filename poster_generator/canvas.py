@@ -217,6 +217,47 @@ class Canvas:
                 to_remove.append(identifier)
         self.remove_elements(to_remove)
 
+    def align_element(self, identifier, x_align="center", y_align="center"):
+        """
+        Align an element within the canvas based on specified horizontal and vertical alignment.
+
+        Args:
+            identifier: The unique identifier of the element to align.
+            x_align: Horizontal alignment option - "left", "center", or "right".
+            y_align: Vertical alignment option - "top", "center", or "bottom".
+            
+        Raises:
+            ValueError: If the specified element is not found or if invalid alignment options are provided.
+        """
+        element = self.elements.get(identifier)
+        if element is None:
+            raise ValueError(f"Element with identifier '{identifier}' not found.")
+
+        elem_width, elem_height = element.get_size()
+        
+        # Calculate new x position
+        if x_align == "left":
+            new_x = 0
+        elif x_align == "center":
+            new_x = (self.width - elem_width) // 2
+        elif x_align == "right":
+            new_x = self.width - elem_width
+        else:
+            raise ValueError(f"Invalid x_align value: {x_align}")
+
+        # Calculate new y position
+        if y_align == "top":
+            new_y = 0
+        elif y_align == "center":
+            new_y = (self.height - elem_height) // 2
+        elif y_align == "bottom":
+            new_y = self.height - elem_height
+        else:
+            raise ValueError(f"Invalid y_align value: {y_align}")
+
+        # Update element position
+        element.position = (new_x, new_y)
+
     def render(self, global_op=None):
         """
         Render all layers and elements to create the final image.

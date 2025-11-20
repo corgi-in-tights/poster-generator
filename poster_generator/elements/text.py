@@ -18,6 +18,23 @@ class TextElement(DrawableElement):
 
         # Always load a real TTF so size works
         self.font = ImageFont.truetype(self.font_path, self.font_size)
+        
+    def get_size(self):
+        """
+        Return the pixel width/height of the rendered text.
+        
+        Returns:
+            (width, height): Tuple of width and height in pixels.
+        """
+        if not self.text:
+            return (0, 0)
+
+        # bbox = (left, top, right, bottom)
+        bbox = self.font.getbbox(self.text)
+        width = bbox[2] - bbox[0]
+        height = bbox[3] - bbox[1]
+
+        return (width, height)
 
     def draw(self, draw: "ImageDraw.Draw", _, blend_settings: dict):
         """
@@ -31,6 +48,8 @@ class TextElement(DrawableElement):
         Raises:
             ValueError: If no position is specified either as parameter or in the element.
         """
+        if self.position is None:
+            raise ValueError("No position specified for TextElement drawing.")
         draw.text(self.position, self.text, font=self.font, fill=self.color)
 
     def is_ready(self):

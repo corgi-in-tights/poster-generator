@@ -8,11 +8,12 @@ height = 512
 canvas = Canvas(width=width, height=height, background="#6f8662")
 
 reg_text = TextElement(
-    (20, 20),
+    None,
     text="I'm regular!",
     font_size=32,
     color="#333333",
 )
+canvas.align_element("reg_text", x_align="center", y_align="center")
 canvas.add_element("reg_text", reg_text)
 
 special_text = TextElement(
