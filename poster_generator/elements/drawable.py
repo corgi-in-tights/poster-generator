@@ -70,3 +70,22 @@ class DrawableElement(ABC):
             (width, height): Tuple of width and height in pixels.
         """
         pass
+    
+    def update_position(self, position):
+        """
+        Update the position of the drawable element.
+
+        Args:
+            position: New position to set for the drawable element.
+        """
+        self.position = position
+        
+    def translate(self, dx: float, dy: float):
+        """
+        Translate the position of the drawable element by the given offsets.
+
+        Args:
+            dx (float): Offset in the x-direction.
+            dy (float): Offset in the y-direction.
+        """
+        self.position = (self.position[0] + dx, self.position[1] + dy)

@@ -13,7 +13,8 @@ reg_text = TextElement(
     font_size=32,
     color="#333333",
 )
-canvas.align_element("reg_text", x_align="center", y_align="center")
+reg_text.update_position(canvas.get_alignment_position(reg_text, x_align="center", y_align="center"))
+reg_text.translate(0, -64)
 canvas.add_element("reg_text", reg_text)
 
 special_text = TextElement(
@@ -22,6 +23,7 @@ special_text = TextElement(
     font_size=32,
     color="#5E174D",
     font_path=Path.cwd() / "examples/assets/super_feel.ttf",
+    max_width=128
 )
 special_text.apply_operation(randomize_text_color)
 canvas.add_element("special_text", special_text)

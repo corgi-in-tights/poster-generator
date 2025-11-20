@@ -46,6 +46,13 @@ cd poster-generator
 poetry install
 ```
 
+## Requirements
+
+- Python >= 3.13
+- Pillow >= 12.0.0
+- PyYAML >= 6.0.3
+
+
 ## Quick Start
 
 ### Programmatic Usage
@@ -162,7 +169,10 @@ image = canvas.render()
 image.save("output.png")
 ```
 
-## Core Concepts
+TODO: Add example image
+
+
+## Advanced Usage
 
 ### Canvas
 
@@ -231,8 +241,6 @@ element.apply_operation(lambda img: apply_hue_shift(img, degrees=45))
 # Set hue from color
 element.apply_operation(lambda img: set_hue_from_hex(img, "#FF5733"))
 ```
-
-## Advanced Usage
 
 ### Custom Element Types
 
@@ -340,15 +348,24 @@ rel_position:
 - `clear_layer(layer)` - Clear all elements from a specific layer
 - `clear_group(group)` - Clear all elements belonging to a specific group
 - `crop(x1, y1, x2, y2)` - Crop the canvas to the rectangular region defined by coordinates (x1, y1) as top-left and (x2, y2) as bottom-right
-- `align_element(identifier, x_align, y_align)` - Set an element's position to a specific canvas-based alignment (e.g., 'center', 'left', 'right', 'top', 'bottom')
+- `get_element_alignment(element, x_align, y_align)` - Get an element's new position to align to a specific canvas-based position (e.g., 'center', 'left', 'right', 'top', 'bottom')
 - `render(global_op=None)` - Render the canvas to an image, optionally applying global operations
 - `from_dict(data)` - Create and populate a canvas from a dictionary representation
+
+### DrawableElement
+
+- `update_position(x, y)` - Set position
+- `translate(dx, dy)` - Move position
+- `overlaps_at(x, y)` - Convenience method to check for overlapping at a point
+- `overlaps_region(x1, y1, x2, y2)` - Check for overlap between the element's bounding box and a region
+- `apply_operation(operation)` - Apply an arbitrary function transformation to its attributes
 
 ### TextElement
 
 - `TextElement(position, text=None, font_path=None, font_size=20, color="#000")` - Create text element
 - `draw(draw, image, position=None)` - Draw the text
 - `is_ready()` - Check if ready to render
+- `update_text()` - Also checks for wrapping and relevant update hooks
 
 ### ImageElement
 
@@ -356,7 +373,6 @@ rel_position:
 - `load_image(image_path)` - Load an image file
 - `apply_hue_shift(degrees)` - Shift image hue
 - `set_hue_from_hex(hex_color)` - Set hue from color
-- `apply_operation(operation)` - Apply transformation
 - `draw(draw, canvas_image, position=None)` - Draw the image
 - `is_ready()` - Check if ready to render
 
@@ -372,12 +388,6 @@ Check out the `examples/` directory for more complete examples:
 - `examples/basic.py` - Programmatic poster creation
 - `examples/yml.py` - YAML template loading
 - `examples/templates/my_template.yml` - Example YAML template
-
-## Requirements
-
-- Python >= 3.13
-- Pillow >= 12.0.0
-- PyYAML >= 6.0.3
 
 ## Development
 

@@ -217,22 +217,18 @@ class Canvas:
                 to_remove.append(identifier)
         self.remove_elements(to_remove)
 
-    def align_element(self, identifier, x_align="center", y_align="center"):
+    def get_alignment_position(self, element, x_align="center", y_align="center"):
         """
-        Align an element within the canvas based on specified horizontal and vertical alignment.
+        Get the posiiton (x, y) to align an element within the canvas based on specified horizontal and vertical alignment.
 
         Args:
-            identifier: The unique identifier of the element to align.
+            element: The element instance to align.
             x_align: Horizontal alignment option - "left", "center", or "right".
             y_align: Vertical alignment option - "top", "center", or "bottom".
             
         Raises:
             ValueError: If the specified element is not found or if invalid alignment options are provided.
         """
-        element = self.elements.get(identifier)
-        if element is None:
-            raise ValueError(f"Element with identifier '{identifier}' not found.")
-
         elem_width, elem_height = element.get_size()
         
         # Calculate new x position
@@ -256,7 +252,7 @@ class Canvas:
             raise ValueError(f"Invalid y_align value: {y_align}")
 
         # Update element position
-        element.position = (new_x, new_y)
+        return (new_x, new_y)
 
     def render(self, global_op=None):
         """
