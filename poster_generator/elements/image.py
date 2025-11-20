@@ -2,7 +2,7 @@ from PIL import Image
 from .drawable import DrawableElement
 
 class ImageElement(DrawableElement):
-    def __init__(self, position, image_path=None, width=None, height=None):
+    def __init__(self, position, image_path, width=None, height=None):
         super().__init__(position)
         self.image_path = image_path
         self.width = width
@@ -25,7 +25,7 @@ class ImageElement(DrawableElement):
         if self.height is None:
             self.height = self.image.height
         
-    def draw(self, draw, canvas_image, position=None, opacity=1.0):
+    def draw(self, _, canvas_image, blend_settings: dict):
         """
         Draw the image onto the canvas with alpha blending.
         
@@ -37,18 +37,14 @@ class ImageElement(DrawableElement):
         Raises:
             ValueError: If no position is specified or no image is loaded.
         """
-        position = position if position else self.position if self.position else None
-        if position is None:
-            raise ValueError("Position must be specified to draw the image element as (x, y).")
-        
-        pos2 = (position[0] + self.width if self.width else 0, 
-                position[1] + self.height if self.height else 0)
+        pos2 = (self.position[0] + self.width if self.width else 0, 
+                self.position[1] + self.height if self.height else 0)
         
         if self.image is None:
             raise ValueError("No image loaded to draw.")
         
         out = self.image.split()
-        canvas_image.paste(self.image, (*position, *pos2), out[3])
+        canvas_image.paste(self.image, (*self.position, *pos2), out[3])
 
     def apply_operation(self, operation):
         """

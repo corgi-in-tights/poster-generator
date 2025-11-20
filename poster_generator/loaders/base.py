@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from poster_generator import Canvas
+from ..canvas import Canvas
 from ..settings import get_logger
 
 logger = get_logger()

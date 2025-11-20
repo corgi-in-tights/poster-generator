@@ -1,20 +1,21 @@
 # Poster Generator
 
-A flexible Python library for programmatically creating posters and graphics with support for layers, groups, and YAML-based templates.
+A *lightweight* flexible Python library for building and rendering graphics with support for layers, groups, and YAML-based templates.
 
 [![Python Version](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## Features
 
-- 🎨 **Flexible Canvas System** - Create posters with customizable dimensions and backgrounds
-- 🔤 **Text Elements** - Add styled text with custom fonts, sizes, and colors
-- 🖼️ **Image Elements** - Load, resize, and transform images with hue shifting and color manipulation
-- 📐 **Layers & Groups** - Organize elements into layers and groups for easy management
-- 📝 **YAML Templates** - Define poster layouts in YAML with variable substitution
-- 🎯 **Anchors & Relative Positioning** - Position elements relative to anchors or other elements
-- 🔧 **Extensible Factory Pattern** - Register custom element types and operations
-- 🎨 **Image Operations** - Built-in support for hue shifting and color transformations
+•	Highly configurable Canvas with necessary
+•	Currently supports image and text elements by default
+•	Layering system for Z-order and basic blend settings
+•	Optional groups for simple categorization or selection
+•	YAML-based templates with variable substitution
+•	Anchors and relative positioning for layout-style placement
+•	Extensible format-agnostic element/operation registry 
+•	Function-driven element operations (e.g., hue shifting, scaling)
+•	Built for automated poster and social media post generation in mind
 
 ## Installation
 
@@ -95,6 +96,8 @@ anchors:
 
 layers:
   background:
+    settings:
+      opacity: 1.0
     elements:
       bg_image:
         type: image
@@ -106,16 +109,30 @@ layers:
           image_path: --${background_image}--
           width: 1080
           height: 1350
-      
+    
+  text:
+    elements:
       title:
         type: text
         rel_position:
           source: anchor
           id: top_left
-          offset: [0, 0]
         values:
           text: --${title_text}--
           font_size: 64
+          color: "#FFFFFF"
+
+      subtitle:
+        type: text
+        rel_position:
+          source: element
+          id: title
+          offset:
+            x: 0
+            y: 50
+        values:
+          text: My subtitle :)
+          font_size: 30
           color: "#FFFFFF"
 ```
 
@@ -222,7 +239,7 @@ class CustomElement(DrawableElement):
         super().__init__(position)
         self.custom_param = custom_param
     
-    def draw(self, draw, image, position=None):
+    def draw(self, draw, image, blend_settings: dict):
         # Your drawing logic
         pass
     
@@ -404,9 +421,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Author
 
-**corgi-in-tights**
+**corgi-in-tights** / Reyaan C.
 
 ## Acknowledgments
 
 - Built with [Pillow](https://python-pillow.org/) for image processing
 - Uses [PyYAML](https://pyyaml.org/) for template parsing
+
+This project and README was partially built with the help of Claude, though all architectural decisions are fully my own.

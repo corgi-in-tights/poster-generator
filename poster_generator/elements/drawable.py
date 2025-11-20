@@ -28,7 +28,7 @@ class DrawableElement(ABC):
         self.position = position
     
     @abstractmethod
-    def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", position=None, opacity=1.0) -> None:
+    def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict) -> None:
         pass
 
     @abstractmethod

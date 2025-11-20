@@ -252,7 +252,7 @@ class Canvas:
                 logger.debug(
                     "CANVAS: Drawing element '%s' in layer '%s'", identifier, layer_name
                 )
-                e.draw(self._draw, self._image, opacity=opacity)
+                e.draw(self._draw, self._image, blend_settings={"opacity": opacity})
             else:
                 logger.error(
                     f"Element '{identifier}' in layer {layer_name} is not ready and will be skipped."

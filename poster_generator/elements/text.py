@@ -18,7 +18,7 @@ class TextElement(DrawableElement):
         # Always load a real TTF so size works
         self.font = ImageFont.truetype(self.font_path, self.font_size)
 
-    def draw(self, draw: "ImageDraw.Draw", image, position=None, opacity=1.0):
+    def draw(self, draw: "ImageDraw.Draw", _, blend_settings: dict):
         """
         Draw the text onto the canvas.
         
@@ -30,11 +30,7 @@ class TextElement(DrawableElement):
         Raises:
             ValueError: If no position is specified either as parameter or in the element.
         """
-        position = position or self.position
-        if position is None:
-            raise ValueError("Position must be specified as (x, y).")
-
-        draw.text(position, self.text, font=self.font, fill=self.color)
+        draw.text(self.position, self.text, font=self.font, fill=self.color)
 
     def is_ready(self):
         """
