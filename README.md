@@ -7,23 +7,21 @@ A *lightweight* flexible Python library for building and rendering graphics with
 
 ## Features
 
-•	Highly configurable Canvas with necessary
+	•	🧱 Layering system for Z-order control and basic blend settings
 
-•	Currently supports image and text elements by default
+	•	🗂️ Optional groups for quick categorization or batch selection
 
-•	Layering system for Z-order and basic blend settings
+	•	📄 YAML templates with variable substitution for reusable layouts
 
-•	Optional groups for simple categorization or selection
+	•	🎯 Anchors & relative positioning for layout-style placement
 
-•	YAML-based templates with variable substitution
+	•	🔌 Extensible, format-agnostic registry for custom elements and operations
 
-•	Anchors and relative positioning for layout-style placement
+	•	🛠️ Function-driven operations (e.g., hue shifting, scaling, transforms)
+    
+	•	📣 Designed for automated poster and social media generation
 
-•	Extensible format-agnostic element/operation registry 
-
-•	Function-driven element operations (e.g., hue shifting, scaling)
-
-•	Built for automated poster and social media post generation in mind
+⸻
 
 
 ## Installation
