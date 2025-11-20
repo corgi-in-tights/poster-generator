@@ -193,6 +193,31 @@ class Canvas:
             return {value}
         return set(value)
 
+    def crop(self, x1: float, y1: float, x2: float, y2: float):
+        """
+        Crop the canvas image to the specified box.
+        
+        WARNING: This is a destructive operation that modifies the canvas size
+        and removes any elements outside the crop region.
+
+        Args:
+            x1: Left coordinate of the crop box.
+            y1: Top coordinate of the crop box.
+            x2: Right coordinate of the crop box.
+            y2: Bottom coordinate of the crop box.
+        """
+        box = (x1, y1, x2, y2)
+        self._image = self._image.crop(box)
+        self.width, self.height = self._image.size
+        self._draw = ImageDraw.Draw(self._image)
+        
+        # remove elements that are out of bounds
+        to_remove = []
+        for identifier, element in self.elements.items():
+            if not element.overlaps_region(x1, y1, x2, y2):
+                to_remove.append(identifier)
+        self.remove_elements(to_remove)
+
     def render(self, global_op=None):
         """
         Render all layers and elements to create the final image.
@@ -330,9 +355,9 @@ class Canvas:
 
         Args:
             data: Dictionary containing canvas settings with optional keys:
-                  - width: Canvas width in pixels (default: 1080)
-                  - height: Canvas height in pixels (default: 1350)
-                  - background: Background color as hex string (default: "#fff")
+                - width: Canvas width in pixels (default: 1080)
+                - height: Canvas height in pixels (default: 1350)
+                - background: Background color as hex string (default: "#fff")
 
         Returns:
             Canvas: A new Canvas instance configured with the provided settings.

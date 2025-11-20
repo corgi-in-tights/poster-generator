@@ -49,4 +49,10 @@ class TextElement(DrawableElement):
         return False
     
     def apply_operation(self, operation):
-        self.text = operation(self.text)
+        old_font_size = self.font_size
+        
+        self.text, self.font_size, self.color = operation((self.text, self.font_size, self.color))
+        
+        # update font if it changed
+        if old_font_size != self.font_size:
+            self.font = ImageFont.truetype(self.font_path, self.font_size)

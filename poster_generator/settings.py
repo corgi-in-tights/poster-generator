@@ -6,7 +6,7 @@ from pathlib import Path
 LIBRARY_NAME = "Poster Generator"
 LIBRARY_SLUG = "poster-generator"
 
-DEBUG = True
+DEBUG = False
 
 def get_logger():
     """
@@ -19,6 +19,8 @@ def get_logger():
 
 logger = get_logger()
 logger.setLevel(logging.DEBUG if DEBUG else logging.INFO)
-logger.addHandler(logging.StreamHandler())
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+logger.addHandler(handler)
 
 DEFAULT_FONT = Path(__file__).parent / "resources/fonts/open_sans.ttf"

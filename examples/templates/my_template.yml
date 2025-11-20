@@ -19,7 +19,7 @@ layers:
           x: 0
           y: 0
         operations:
-          hue_shift:
+          apply_hue_shift:
             degrees: --${hue_shift}--
         values:
           image_path: --${background_image}--

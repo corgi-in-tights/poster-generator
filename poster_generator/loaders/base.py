@@ -7,7 +7,7 @@ from ..settings import get_logger
 
 logger = get_logger()
 
-class CanvasLoader(ABC):
+class BaseCanvasLoader(ABC):
     """
     Abstract base class for loading canvas configurations from various formats.
     

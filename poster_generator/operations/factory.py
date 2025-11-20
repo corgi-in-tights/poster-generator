@@ -78,3 +78,18 @@ def get_operation_factory() -> OperationFactory:
         OperationFactory: The global operation factory instance.
     """
     return _default_factory
+
+
+def register_operation(
+    operation_name: str, operation_func, supported_types: list[str]
+):
+    """
+    Register a new operation in the global factory.
+    
+    Args:
+        operation_name: Unique name for the operation (e.g., "apply_hue_shift").
+        operation_func: Callable that performs the operation.
+        supported_types: List of element type names this operation supports.
+    """
+    get_operation_factory().register(operation_name, operation_func, supported_types)
+    

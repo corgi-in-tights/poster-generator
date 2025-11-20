@@ -68,3 +68,13 @@ _default_factory = ElementFactory()
 def get_factory() -> ElementFactory:
     """Get the default factory instance."""
     return _default_factory
+
+def register_element(element_type: str, element_class: Type[DrawableElement]):
+    """
+    Register a new element type in the global factory.
+    
+    Args:
+        element_type: String identifier for the element type (e.g., "text", "image")
+        element_class: The class to instantiate for this type
+    """
+    get_factory().register(element_type, element_class)

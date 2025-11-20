@@ -2,10 +2,10 @@
 
 import yaml
 
-from .base import CanvasLoader
+from .base import BaseCanvasLoader
 
 
-class YamlLoader(CanvasLoader):
+class YamlLoader(BaseCanvasLoader):
     """
     Canvas loader for YAML configuration files.
     

@@ -1,6 +1,5 @@
 from PIL import Image
 from .drawable import DrawableElement
-import colorsys
 
 class ImageElement(DrawableElement):
     def __init__(self, position, image_path=None, width=None, height=None):
@@ -8,78 +7,24 @@ class ImageElement(DrawableElement):
         self.image_path = image_path
         self.width = width
         self.height = height
+        
         self.image = None
         if image_path:
-            self.load_image(image_path)
+            self._load_image(image_path)
 
-
-    def load_image(self, image_path):
+    def _load_image(self, image_path):
         self.image_path = image_path
         self.image = Image.open(image_path).convert("RGBA")
     
         if self.width or self.height:
             self.image = self.image.resize((self.width, self.height))
-
-    def apply_hue_shift(self, degrees: float):
-        img = self.image.convert("RGBA")
-        hsv = img.convert("HSV")
+            
+        # Set from image
+        if self.width is None:
+            self.width = self.image.width
+        if self.height is None:
+            self.height = self.image.height
         
-        h, s, v = hsv.split()
-        hue_shift_pixels = h.point(lambda p: (p + int(degrees * 255 / 360)) % 256)
-        
-        hsv = Image.merge("HSV", (hue_shift_pixels, s, v))
-        
-        self.image = hsv.convert("RGBA")
-        
-    def set_hue_from_hex(self, hex_color: str):
-        """
-        Replace the hue of all pixels with the hue from a hex color.
-        
-        Preserves the saturation and value of each pixel while replacing only the hue
-        component with the hue from the specified hex color.
-        
-        Args:
-            hex_color: Hex color string (e.g., "#FF5733" or "FF5733").
-        """
-        hex_color = hex_color.lstrip("#")
-        r_hex = int(hex_color[0:2], 16)
-        g_hex = int(hex_color[2:4], 16)
-        b_hex = int(hex_color[4:6], 16)
-
-        # Convert hex target to HSV → we only keep Hue
-        target_h, _, _ = colorsys.rgb_to_hsv(
-            r_hex / 255.0, g_hex / 255.0, b_hex / 255.0
-        )
-
-        # Make sure working in RGBA
-        self.image = self.image.convert("RGBA")
-        pixels = self.image.load()
-
-        width, height = self.image.size
-
-        for y in range(height):
-            for x in range(width):
-                r, g, b, a = pixels[x, y]
-
-                # convert pixel to HSV
-                h, s, v = colorsys.rgb_to_hsv(
-                    r / 255.0, g / 255.0, b / 255.0
-                )
-
-                # replace hue
-                h = target_h
-
-                # convert back to RGB
-                r2, g2, b2 = colorsys.hsv_to_rgb(h, s, v)
-
-                pixels[x, y] = (
-                    int(r2 * 255),
-                    int(g2 * 255),
-                    int(b2 * 255),
-                    a,
-                )
-        
-    
     def draw(self, draw, canvas_image, position=None, opacity=1.0):
         """
         Draw the image onto the canvas with alpha blending.
@@ -124,5 +69,10 @@ class ImageElement(DrawableElement):
         return self.image is not None
 
     def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
-        return False
+        return (
+            self.position[0] <= x1 <= self.position[0] + (self.width or 0) and
+            self.position[1] <= y1 <= self.position[1] + (self.height or 0) and
+            self.position[0] <= x2 <= self.position[0] + (self.width or 0) and
+            self.position[1] <= y2 <= self.position[1] + (self.height or 0)
+        )
     
