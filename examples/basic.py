@@ -15,3 +15,5 @@ canvas.add_element("title", text_element)
 
 image = canvas.render()
 image.show()
+
+image.save("basic_poster.png")
