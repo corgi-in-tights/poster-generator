@@ -406,41 +406,20 @@ poetry run python examples/basic.py
 poetry run python examples/yml.py
 ```
 
-### Project Structure
-
-```
-poster_generator/
-├── ...
-├── canvas.py              # Canvas class
-├── elements/              # Element implementations
-│   ├── drawable.py        # Base element class
-│   ├── text.py            # Text element
-│   ├── image.py           # Image element
-│   └── factory.py         # Element factory
-├── loaders/               # Template loaders
-│   ├── base.py            # Base loader
-│   └── yaml_loader.py     # YAML loader
-└── operations/            # Image operations
-    ├── ...
-    └── factory.py         # Operation factory
-```
-
-## Contributing
+## Contributing and Issues
 
 Contributions are welcome! Please feel free to submit a Pull Request. I am open to significant design changes if they match the project's intention.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Issues
 
 I cannot guarantee this project will be actively maintained since there really isn't much to add from my end. The current end product fulfills my rather primitive needs -- however, if any critical bugs come up, please open a GitHub issue. 
 
 If there are architectural issues (i.e. inflexible code), then please feel free to open an issue, but for additional features, a PR would be much preferred.
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## Acknowledgments
 
-- Built with [Pillow](https://python-pillow.org/) for image processing
+- Built with [Pillow](https://python-pillow.org/) for image processing (a Pillow wrapper really)
 - Uses [PyYAML](https://pyyaml.org/) for template parsing (by default)
 - This project and README was partially built with the help of Claude, though all architectural decisions are fully my own.
