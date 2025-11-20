@@ -7,7 +7,7 @@ A *lightweight* flexible Python library for building and rendering graphics with
 
 ## Features
 
-	•	🧱 Layering system for Z-order control and basic blend settings
+	•	🧱 Layering system for Z-order control and basic blend settings leveraging [Pillow](https://python-pillow.org/)
 
 	•	🗂️ Optional groups for quick categorization or batch selection
 
@@ -420,19 +420,20 @@ poster-generator/
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. I am open to significant design changes if they match the project's intention.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Author
+## Issues
 
-**corgi-in-tights** / Reyaan C.
+I cannot guarantee this project will be actively maintained since there really isn't much to add from my end. The current end product fulfills my rather primitive needs -- however, if any critical bugs come up, please open a GitHub issue. 
+
+If there are architectural issues (i.e. inflexible code), then please feel free to open an issue, but for additional features, a PR would be much preferred.
 
 ## Acknowledgments
 
 - Built with [Pillow](https://python-pillow.org/) for image processing
-- Uses [PyYAML](https://pyyaml.org/) for template parsing
-
-This project and README was partially built with the help of Claude, though all architectural decisions are fully my own.
+- Uses [PyYAML](https://pyyaml.org/) for template parsing (by default)
+- This project and README was partially built with the help of Claude, though all architectural decisions are fully my own.
