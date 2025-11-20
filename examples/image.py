@@ -10,7 +10,7 @@ canvas = Canvas(width=width, height=height, background="#c75d5d")
 
 background = ImageElement(
     (0, 0),
-    image_path=Path.cwd() / "examples/assets/bg.png",
+    image_path=Path.cwd() / "examples/assets/my_background.jpg",
     width=width,
     height=height,
 )
@@ -20,7 +20,7 @@ canvas.add_element("background", background)
 
 
 text_element = TextElement(
-    (width//2, height//2),
+    (100, height//2 - 64),
     text="This time, with a background!",
     font_size=64,
     color="#333333",

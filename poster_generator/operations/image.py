@@ -19,17 +19,18 @@ def ensure_rgba(image: Image) -> Image:
     return image
 
 
-def apply_hue_shift(image: Image, degrees: float):
+def apply_hue_shift(image_obj, degrees: float):
     """
     Shift the hue of an image by a specified number of degrees.
     
     Args:
-        image: PIL Image to transform.
+        image_obj: Dict containing a PIL Image under the key "image".
         degrees: Number of degrees to shift the hue (0-360).
     
     Returns:
         PIL Image with shifted hue in RGBA mode.
     """
+    image = image_obj["image"]
     hsv = ensure_rgba(image).convert("HSV")
     
     h, s, v = hsv.split()
@@ -37,10 +38,10 @@ def apply_hue_shift(image: Image, degrees: float):
     
     hsv = Image.merge("HSV", (hue_shift_pixels, s, v))
     
-    return hsv.convert("RGBA")
+    image_obj["image"] = hsv.convert("RGBA")
     
     
-def set_hue_from_hex(image: Image, hex_color: str):
+def set_hue_from_hex(image_obj, hex_color: str):
     """
     Replace the hue of all pixels with the hue from a hex color.
     
@@ -48,12 +49,14 @@ def set_hue_from_hex(image: Image, hex_color: str):
     component with the hue from the specified hex color.
     
     Args:
-        image: PIL Image to transform.
+        image_obj: Dict containing a PIL Image under the key "image".
         hex_color: Hex color string (e.g., "#FF5733" or "FF5733").
     
     Returns:
         PIL Image with replaced hue in RGBA mode.
     """
+    image = image_obj["image"]
+    
     pixels = ensure_rgba(image).load()
     width, height = image.size
     
@@ -88,4 +91,4 @@ def set_hue_from_hex(image: Image, hex_color: str):
                 a,
             )
             
-    return image
+    image_obj["image"] = image

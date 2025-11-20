@@ -47,7 +47,14 @@ class TextElement(DrawableElement):
     def apply_operation(self, operation):
         old_font_size = self.font_size
         
-        self.text, self.font_size, self.color = operation((self.text, self.font_size, self.color))
+        res = operation({
+            "text": self.text,
+            "font_size": self.font_size,
+            "color": self.color
+        })
+        self.text = res["text"]
+        self.font_size = res["font_size"]
+        self.color = res["color"]
         
         # update font if it changed
         if old_font_size != self.font_size:

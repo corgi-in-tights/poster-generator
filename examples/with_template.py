@@ -9,7 +9,7 @@ loader = YamlLoader()
 variables = {
     "hue_shift": 45,
     "title_text": "Hello, Poster Generator!",
-    "background_image": str(Path.cwd() / "examples/assets/my_background.png"),
+    "background_image": str(Path.cwd() / "examples/assets/my_background.jpg"),
 }
 
 canvas = loader.build_canvas(path, variables)

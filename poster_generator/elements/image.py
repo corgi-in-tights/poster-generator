@@ -53,7 +53,10 @@ class ImageElement(DrawableElement):
         Args:
             operation: Callable that takes a PIL Image and returns a transformed PIL Image.
         """
-        self.image = operation(self.image)
+        result = operation({
+            "image": self.image
+        })
+        self.image = result["image"]
         
     def is_ready(self):
         """

@@ -1,6 +1,7 @@
 """Factory for registering and applying image operations."""
 
 from .image import apply_hue_shift, set_hue_from_hex
+from .text import randomize_text_color
 
 class OperationFactory:
     """
@@ -18,6 +19,7 @@ class OperationFactory:
         """Register the default built-in operations."""
         self.register("apply_hue_shift", apply_hue_shift, supported_types=["image"])
         self.register("set_hue_from_hex", set_hue_from_hex, supported_types=["image"])
+        self.register("randomize_text_color", randomize_text_color, supported_types=["text"])
     
     def register(self, operation_name: str, operation_func, supported_types: list[str]):
         """
