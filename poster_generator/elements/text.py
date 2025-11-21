@@ -12,23 +12,69 @@ DEFAULT_FONT = Path(__file__).parent.parent / "resources/fonts/open_sans.ttf"
 logger = logging.getLogger(__name__)
 
 class TextElement(DrawableElement):
-    FONT_CACHE = {}
+    """
+    A drawable text element that renders text on a canvas with support for wrapping, alignment, and font caching.
+    This class extends DrawableElement to provide text rendering capabilities with features like:
+    - Automatic text wrapping (word or character-based)
+    - Text alignment (left, center, right)
+    - Font caching to optimize performance
+    - Customizable font, size, and color
+    - Dynamic text updates and region overlap detection
+    Attributes:
+        TextElement.font_cache (dict): Class-level cache storing fonts by (font_path, font_size).
+        font_path (str): Path to the font file being used.
+        font_size (int): Size of the font in points.
+        max_width (int or None): Maximum width in pixels for text wrapping.
+        wrap_style (str): Text wrapping style - "word", "char", or "none".
+        color (str): Text color in hex format.
+        text_alignment (str): Text alignment style - "center", "left", or "right".
+        font (ImageFont): PIL ImageFont object for rendering.
+        text (str): The actual text content, possibly wrapped.
+    Example:
+        >>> text_elem = TextElement(
+        ...     position=(100, 100),
+        ...     text="Hello World",
+        ...     font_size=24,
+        ...     max_width=200,
+        ...     wrap_style="word",
+        ...     color="#FF0000"
+        ... )
+        >>> width, height = text_elem.get_size()
+        >>> text_elem.update_text("New text content")
+    """
+    font_cache = {}
     
-    def __init__(self, position, text="", font_path=None, font_size=20, max_width=None, wrap_style="word", color="#000"):
+    def __init__(self, position, text="", font_path=None, font_size=20, max_width=None, wrap_style="word", text_alignment="left", color="#000"):
+        """
+        Initialize a TextElement with specified properties.
+        Args:
+            position: The (x, y) coordinates for positioning the text element.
+            text (str, optional): The text content to display. Defaults to "".
+            font_path (str, optional): Path to the font file. If None, uses DEFAULT_FONT. Defaults to None.
+            font_size (int, optional): Size of the font in points. Defaults to 20.
+            max_width (int, optional): Maximum width for text wrapping. If None, no wrapping is applied. Defaults to None.
+            wrap_style (str, optional): Style of text wrapping ("word" or other). Defaults to "word".
+            text_alignment (str, optional): Text alignment ("center", "left", or "right"). Defaults to "center".
+            color (str, optional): Text color in hex format (e.g., "#000" for black). Defaults to "#000".
+        Notes:
+            - Implements font caching to avoid reloading the same font multiple times across instances.
+            - Font cache is stored in TextElement.FONT_CACHE using (font_path, font_size) as key.
+        """
         super().__init__(position)
         self.font_path = font_path or DEFAULT_FONT
         self.font_size = font_size
         self.max_width = max_width
         self.wrap_style = wrap_style
         self.color = color
+        self.text_alignment = text_alignment
         
         # Attempt to cache across instances to avoid reloading same font multiple times
         fk = (self.font_path, self.font_size)
-        if fk in (TextElement.FONT_CACHE or {}):
-            self.font = TextElement.FONT_CACHE[fk]
+        if fk in (TextElement.font_cache or {}):
+            self.font = TextElement.font_cache[fk]
         else:
             self.font = ImageFont.truetype(self.font_path, self.font_size)
-            TextElement.FONT_CACHE[(self.font_path, self.font_size)] = self.font
+            TextElement.font_cache[(self.font_path, self.font_size)] = self.font
             
         self.update_text(text)
             
@@ -132,7 +178,7 @@ class TextElement(DrawableElement):
         """
         if self.position is None:
             raise ValueError("No position specified for TextElement drawing.")
-        draw.text(self.position, self.text, font=self.font, fill=self.color)
+        draw.text(self.position, self.text, font=self.font, fill=self.color, align=self.text_alignment)
 
     def is_ready(self):
         """

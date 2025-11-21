@@ -150,6 +150,8 @@ layers:
           color: "#FFFFFF"
 ```
 
+The full format is fairly intuitive but outlined in [TEMPLATES.md](https://github.com/corgi-in-tights/poster-generator/blob/main/TEMPLATES.md)
+
 Load and render the template:
 
 ```python
@@ -293,50 +295,6 @@ specific = canvas.get_elements(
 )
 ```
 
-### YAML Variable Substitution
-
-Use `--${variable_name}--` syntax in YAML templates:
-
-```yaml
-values:
-  text: --${title}--
-  font_size: --${size}--
-  color: --${color}--
-```
-
-```python
-canvas = loader.build_canvas(
-    "template.yml",
-    variables={
-        "title": "My Title",
-        "size": 48,
-        "color": "#FF0000"
-    }
-)
-```
-
-### Relative Positioning
-
-Position elements relative to anchors or other elements:
-
-```yaml
-# Relative to anchor
-rel_position:
-  source: anchor
-  id: top_left
-  offset:
-    x: 20
-    y: 30
-
-# Relative to another element
-rel_position:
-  source: element
-  id: title
-  offset:
-    x: 0
-    y: 50
-```
-
 ## API Reference
 
 ### Canvas
@@ -348,9 +306,9 @@ rel_position:
 - `clear_layer(layer)` - Clear all elements from a specific layer
 - `clear_group(group)` - Clear all elements belonging to a specific group
 - `crop(x1, y1, x2, y2)` - Crop the canvas to the rectangular region defined by coordinates (x1, y1) as top-left and (x2, y2) as bottom-right
-- `get_element_alignment(element, x_align, y_align)` - Get an element's new position to align to a specific canvas-based position (e.g., 'center', 'left', 'right', 'top', 'bottom')
+- `get_element_alignment(element, x_align, y_align)` - Get an element's new position to align to a specific canvas-based position (e.g., 'left', 'center', 'right', 'top', 'middle', 'bottom')
 - `render(global_op=None)` - Render the canvas to an image, optionally applying global operations
-- `from_dict(data)` - Create and populate a canvas from a dictionary representation
+- static `from_dict(data)` - Create and populate a canvas from a dictionary representation
 
 ### DrawableElement
 
@@ -360,30 +318,9 @@ rel_position:
 - `overlaps_region(x1, y1, x2, y2)` - Check for overlap between the element's bounding box and a region
 - `apply_operation(operation)` - Apply an arbitrary function transformation to its attributes
 
-### TextElement
-
-- `TextElement(position, text=None, font_path=None, font_size=20, color="#000")` - Create text element
-- `draw(draw, image, position=None)` - Draw the text
-- `is_ready()` - Check if ready to render
-- `update_text()` - Also checks for wrapping and relevant update hooks
-
-### ImageElement
-
-- `ImageElement(position, image_path=None, width=None, height=None)` - Create image element
-- `load_image(image_path)` - Load an image file
-- `apply_hue_shift(degrees)` - Shift image hue
-- `set_hue_from_hex(hex_color)` - Set hue from color
-- `draw(draw, canvas_image, position=None)` - Draw the image
-- `is_ready()` - Check if ready to render
-
-### YamlLoader
-
-- `YamlLoader()` - Create YAML loader
-- `build_canvas(source, variables=None)` - Build canvas from YAML file or dict
-
 ## Examples
 
-Check out the `examples/` directory for more complete examples:
+Check out the `examples/` directory for more complete examples and [TEMPLATES.md](https://github.com/corgi-in-tights/poster-generator/blob/main/TEMPLATES.md):
 
 - `examples/basic.py` - Programmatic poster creation
 - `examples/yml.py` - YAML template loading

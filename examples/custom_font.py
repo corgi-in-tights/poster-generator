@@ -23,7 +23,8 @@ special_text = TextElement(
     font_size=32,
     color="#5E174D",
     font_path=Path.cwd() / "examples/assets/super_feel.ttf",
-    max_width=128
+    max_width=128,
+    text_alignment="center"
 )
 special_text.apply_operation(randomize_text_color)
 canvas.add_element("special_text", special_text)
