@@ -78,7 +78,8 @@ class DrawableElement(ABC):
         Args:
             position: New position to set for the drawable element.
         """
-        self.position = position
+        if position is not None:
+            self.position = position
         
     def translate(self, dx: float, dy: float):
         """

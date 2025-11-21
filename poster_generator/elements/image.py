@@ -46,18 +46,27 @@ class ImageElement(DrawableElement):
         if image_path:
             self._load_image(image_path)
 
+    def resize_image(self, new_width, new_height):
+        if new_width == self.width and new_height == self.height:
+            return
+        
+        self.image = self.image.resize((new_width, new_height))
+        self.width = new_width
+        self.height = new_height
+
     def _load_image(self, image_path):
         self.image_path = image_path
         self.image = Image.open(image_path).convert("RGBA")
-    
-        if self.width or self.height:
-            self.image = self.image.resize((self.width, self.height))
-            
-        # Set from image
+        
+        # Set from image for any missing attributes
         if self.width is None:
             self.width = self.image.width
         if self.height is None:
             self.height = self.image.height
+            
+        self.image = self.image.resize((self.width, self.height))
+        
+
         
     def draw(self, draw_ctx, canvas_image, blend_settings: dict):
         """
@@ -90,10 +99,30 @@ class ImageElement(DrawableElement):
         Args:
             operation: Callable that takes a PIL Image and returns a transformed PIL Image.
         """
-        result = operation({
-            "image": self.image
+        old_image_path = self.image_path
+        old_width = self.width
+        old_height = self.height
+        
+        res = operation({
+            "position": self.position,
+            "image": self.image,
+            "image_path": self.image_path,
+            "width": self.width,
+            "height": self.height
         })
-        self.image = result["image"]
+        self.update_position(res.get("position", self.position))
+        self.image = res.get("image", self.image)
+        self.width = res.get("width", self.width)
+        self.height = res.get("height", self.height)
+        self.image_path = res.get("image_path", self.image_path)
+        
+        # If any sensitive values change, reload the loaded image
+        if old_image_path != self.image_path:
+            self._load_image(self.image_path)
+        
+        if self.image_path != old_image_path or self.width != old_width or self.height != old_height:
+            self.resize_image(self.width, self.height)
+        
         
     def is_ready(self):
         """

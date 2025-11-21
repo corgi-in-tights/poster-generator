@@ -235,14 +235,27 @@ headers = canvas.get_elements(groups="headers")
 Apply transformations to elements:
 
 ```python
-from poster_generator.operations.image import apply_hue_shift, set_hue_from_hex
+from poster_generator.operations import apply_hue_shift, set_hue_from_hex
 
 # Hue shift
-element.apply_operation(lambda img: apply_hue_shift(img, degrees=45))
+element.apply_operation(lambda img_obj: apply_hue_shift(img_obj, degrees=45))
 
 # Set hue from color
 element.apply_operation(lambda img: set_hue_from_hex(img, "#FF5733"))
 ```
+
+Custom operations can be made:
+```python
+from poster_generator.operations import register_operation
+
+def uppercase_and_color(text_obj, new_color):
+    text_obj["text"] = text_obj["text"].upper()
+    text_obj["color"] = new_color
+    return text_obj
+
+my_text_element.apply_operation(lambda t: uppercase_and_color(t, "#f7e22f"))
+```
+
 
 ### Custom Element Types
 

@@ -68,16 +68,19 @@ class TextElement(DrawableElement):
         self.color = color
         self.text_alignment = text_alignment
         
-        # Attempt to cache across instances to avoid reloading same font multiple times
+        self._reset_font()
+        self.update_text(text)
+        
+    def _reset_font(self):
+        """Reset the font object based on current font_path and font_size."""
         fk = (self.font_path, self.font_size)
+        
+        # Attempt to cache across instances to avoid reloading same font multiple times
         if fk in (TextElement.font_cache or {}):
             self.font = TextElement.font_cache[fk]
         else:
             self.font = ImageFont.truetype(self.font_path, self.font_size)
             TextElement.font_cache[(self.font_path, self.font_size)] = self.font
-            
-        self.update_text(text)
-            
     
     def update_text(self, t: str):
         """
@@ -202,16 +205,29 @@ class TextElement(DrawableElement):
         old_font_path = self.font_path
         
         res = operation({
+            "position": self.position,
             "text": self.text,
             "font_size": self.font_size,
             "font_path": self.font_path,
-            "color": self.color
+            "color": self.color,
+            "max_width": self.max_width,
+            "wrap_style": self.wrap_style,
+            "text_alignment": self.text_alignment
         })
+        self.update_position(res.get("position", self.position))
         self.update_text(res["text"])
         self.font_size = res["font_size"]
         self.font_path = res["font_path"]
         self.color = res["color"]
+        self.max_width = res["max_width"]
+        self.wrap_style = res["wrap_style"]
+        self.text_alignment = res["text_alignment"]
         
         # update font if it changed
         if old_font_size != self.font_size or old_font_path != self.font_path:
-            self.font = ImageFont.truetype(self.font_path, self.font_size)
+            self._reset_font()
+
+        if (self.max_width != res["max_width"] or 
+            self.wrap_style != res["wrap_style"] or
+            self.text_alignment != res["text_alignment"]):
+            self.update_text(self.text)
