@@ -8,16 +8,11 @@ from .base import BaseCanvasLoader
 class YamlLoader(BaseCanvasLoader):
     """
     Canvas loader for YAML configuration files.
-    
-    Supports variable substitution using the format: --${variable_name}--
-    
-    Attributes:
-        SCHEMA_VERSION: Supported (latest) schema version for YAML files.
     """
     
     SCHEMA_VERSION = "1.0"
 
-    def _read_source(self, path: str) -> dict:
+    def read_source(self, path: str) -> dict:
         """
         Load and parse a YAML file.
         

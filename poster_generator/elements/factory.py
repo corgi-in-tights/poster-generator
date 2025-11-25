@@ -2,6 +2,8 @@ from typing import Dict, Type, Any, Tuple, Optional
 from .drawable import DrawableElement
 from .text import TextElement
 from .image import ImageElement
+from .rectangle import RectangleElement
+from .circle import CircleElement
 
 
 class ElementFactory:
@@ -12,6 +14,8 @@ class ElementFactory:
     def _register_defaults(self):
         self.register("text", TextElement)
         self.register("image", ImageElement)
+        self.register("rectangle", RectangleElement)
+        self.register("circle", CircleElement)
     
     def register(self, element_type: str, element_class: Type[DrawableElement]):
         """

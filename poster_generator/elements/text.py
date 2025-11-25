@@ -12,26 +12,27 @@ DEFAULT_FONT = Path(__file__).parent.parent / "resources/fonts/open_sans.ttf"
 logger = logging.getLogger(__name__)
 
 class TextElement(DrawableElement):
-    """
-    A drawable text element that renders text on a canvas with support for wrapping, alignment, and font caching.
-    This class extends DrawableElement to provide text rendering capabilities with features like:
-    - Automatic text wrapping (word or character-based)
-    - Text alignment (left, center, right)
-    - Font caching to optimize performance
-    - Customizable font, size, and color
-    - Dynamic text updates and region overlap detection
-    Attributes:
-        TextElement.font_cache (dict): Class-level cache storing fonts by (font_path, font_size).
-        font_path (str): Path to the font file being used.
+    """A drawable text element with support for wrapping, alignment, and font caching.
+    
+    This class extends DrawableElement to provide text rendering capabilities including
+    automatic text wrapping (word or character-based), text alignment (left, center, right),
+    font caching for performance optimization, and customizable font, size, and color.
+    
+    Class Attributes:
+        font_cache (dict): Cache storing fonts by (font_path, font_size).
+    
+    Attributes:    
+        font_path (str): Path to the TrueType font file being used.
         font_size (int): Size of the font in points.
         max_width (int or None): Maximum width in pixels for text wrapping.
         wrap_style (str): Text wrapping style - "word", "char", or "none".
-        color (str): Text color in hex format.
+        color (str): Text color in hex format (e.g., "#000000").
         text_alignment (str): Text alignment style - "center", "left", or "right".
-        font (ImageFont): PIL ImageFont object for rendering.
+        font (ImageFont.FreeTypeFont): PIL ImageFont object for rendering.
         text (str): The actual text content, possibly wrapped.
+    
     Example:
-        >>> text_elem = TextElement(
+        >>> my_text = TextElement(
         ...     position=(100, 100),
         ...     text="Hello World",
         ...     font_size=24,
@@ -39,26 +40,22 @@ class TextElement(DrawableElement):
         ...     wrap_style="word",
         ...     color="#FF0000"
         ... )
-        >>> width, height = text_elem.get_size()
-        >>> text_elem.update_text("New text content")
+        >>> my_text.update_text("New text content")
     """
     font_cache = {}
     
     def __init__(self, position, text="", font_path=None, font_size=20, max_width=None, wrap_style="word", text_alignment="left", color="#000"):
-        """
-        Initialize a TextElement with specified properties.
+        """Initialize a TextElement with specified properties.
+        
         Args:
-            position: The (x, y) coordinates for positioning the text element.
+            position (tuple): The (x, y) coordinates for positioning the text element.
             text (str, optional): The text content to display. Defaults to "".
             font_path (str, optional): Path to the font file. If None, uses DEFAULT_FONT. Defaults to None.
             font_size (int, optional): Size of the font in points. Defaults to 20.
             max_width (int, optional): Maximum width for text wrapping. If None, no wrapping is applied. Defaults to None.
-            wrap_style (str, optional): Style of text wrapping ("word" or other). Defaults to "word".
-            text_alignment (str, optional): Text alignment ("center", "left", or "right"). Defaults to "center".
-            color (str, optional): Text color in hex format (e.g., "#000" for black). Defaults to "#000".
-        Notes:
-            - Implements font caching to avoid reloading the same font multiple times across instances.
-            - Font cache is stored in TextElement.FONT_CACHE using (font_path, font_size) as key.
+            wrap_style (str, optional): Style of text wrapping - "word", "char", or "none". Defaults to "word".
+            text_alignment (str, optional): Text alignment - "center", "left", or "right". Defaults to "left".
+            color (str, optional): Text color in hex format (e.g., "#000000"). Defaults to "#000".
         """
         super().__init__(position)
         self.font_path = font_path or DEFAULT_FONT
@@ -204,7 +201,7 @@ class TextElement(DrawableElement):
         old_font_size = self.font_size
         old_font_path = self.font_path
         
-        res = operation({
+        result = operation({
             "position": self.position,
             "text": self.text,
             "font_size": self.font_size,
@@ -214,20 +211,21 @@ class TextElement(DrawableElement):
             "wrap_style": self.wrap_style,
             "text_alignment": self.text_alignment
         })
-        self.update_position(res.get("position", self.position))
-        self.update_text(res["text"])
-        self.font_size = res["font_size"]
-        self.font_path = res["font_path"]
-        self.color = res["color"]
-        self.max_width = res["max_width"]
-        self.wrap_style = res["wrap_style"]
-        self.text_alignment = res["text_alignment"]
+        self.update_position(result.get("position", self.position))
+        self.font_size = result["font_size"]
+        self.font_path = result["font_path"]
+        self.color = result["color"]
+        self.max_width = result["max_width"]
+        self.wrap_style = result["wrap_style"]
+        self.text_alignment = result["text_alignment"]
         
         # update font if it changed
         if old_font_size != self.font_size or old_font_path != self.font_path:
             self._reset_font()
 
-        if (self.max_width != res["max_width"] or 
-            self.wrap_style != res["wrap_style"] or
-            self.text_alignment != res["text_alignment"]):
-            self.update_text(self.text)
+        if (result["text"] != self.text or
+            self.max_width != result["max_width"] or 
+            self.wrap_style != result["wrap_style"] or
+            self.text_alignment != result["text_alignment"]):
+            
+            self.update_text(result["text"])

@@ -12,7 +12,7 @@ class BaseCanvasLoader(ABC):
     Abstract base class for loading canvas configurations from various formats.
     
     Subclasses must implement:
-        - _read_source(): Converts a file path to raw data (dict)
+        - read_source(): Converts a file path to raw data (dict)
         - deserialize(): Converts raw data to normalized canvas configuration
     
     Subclasses may optionally override:
@@ -63,14 +63,14 @@ class BaseCanvasLoader(ABC):
             TypeError: If source is neither a string nor a dictionary.
         """
         if isinstance(source, str):
-            return self._read_source(source)
+            return self.read_source(source)
         elif isinstance(source, dict):
             return source
         else:
             raise TypeError(f"Invalid source type: {type(source)}")
 
     @abstractmethod
-    def _read_source(self, path: str) -> dict:
+    def read_source(self, path: str) -> dict:
         """
         Read and parse a file into a raw data dictionary.
         

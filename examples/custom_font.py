@@ -1,11 +1,20 @@
 from pathlib import Path
-from poster_generator import Canvas, TextElement
+from poster_generator import Canvas, TextElement, RectangleElement
 from poster_generator.operations.text import randomize_text_color
 
 width = 512
 height = 512
 
 canvas = Canvas(width=width, height=height, background="#6f8662")
+
+bg = RectangleElement(
+    (64, 64),
+    width=width-128,
+    height=height-128,
+    background="#4B5D4D",
+    radius=16,
+)
+canvas.add_element("bg", bg)
 
 reg_text = TextElement(
     None,

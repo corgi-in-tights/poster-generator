@@ -5,7 +5,7 @@ This file is an in-depth overview of the in-built YAML template loader that come
 ### Format
 
 ```yaml
-schema: "1.0" # see Github for schematic updates
+schema: "1.0"
 
 settings: # Canvas settings
   width: # Canvas width, default 1080
@@ -260,7 +260,7 @@ def uppercase_and_color(text_obj, new_color):
 
 # Register to operation factory
 register_operation(
-    "uppercase_and_color",
+    "mynamespace.uppercase_and_color", # Recommended to attach a namespace!
     uppercase_and_color,
     supported_types=["text"]
 )
@@ -269,7 +269,7 @@ register_operation(
 ```
 ```yaml
 operations:
-  uppercase_and_color:
+  mynamespace.uppercase_and_color:
     new_color: "#f7e22f"
 ```
 

@@ -339,23 +339,6 @@ Check out the `examples/` directory for more complete examples and [TEMPLATES.md
 - `examples/yml.py` - YAML template loading
 - `examples/templates/my_template.yml` - Example YAML template
 
-## Development
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/corgi-in-tights/poster-generator.git
-cd poster-generator
-
-# Install dependencies
-poetry install
-
-# Run examples
-poetry run python examples/basic.py
-poetry run python examples/yml.py
-```
-
 ## Contributing and Issues
 
 Contributions are welcome! Please feel free to submit a Pull Request. I am open to significant design changes if they match the project's intention.

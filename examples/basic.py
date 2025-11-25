@@ -1,9 +1,18 @@
-from poster_generator import Canvas, TextElement
+from poster_generator import Canvas, TextElement, CircleElement
 
 width = 1080
 height = 1350
 
 canvas = Canvas(width=width, height=height, background="#c75d5d")
+
+
+bg = CircleElement(
+    (width//2, height//2),
+    radius=(width-128)//2,
+    background="#7C2F0B",
+)
+canvas.add_element("bg", bg)
+
 
 text_element = TextElement(
     (50, 50),

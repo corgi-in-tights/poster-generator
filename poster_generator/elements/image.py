@@ -2,40 +2,36 @@ from PIL import Image
 from .drawable import DrawableElement
 
 class ImageElement(DrawableElement):
-    """
-    A drawable element that represents an image on the poster canvas.
-    This class handles loading, resizing, and rendering images onto the poster.
-    It supports alpha blending and various image transformations through operations.
-        position (tuple): The (x, y) coordinates of the image's top-left corner.
+    """A drawable element that represents an image on the poster canvas.
+    
+    This class handles loading, resizing, and rendering images onto the poster with support
+    for alpha blending and various image transformations through operations.
+    
+    Attributes:
         image_path (str): Path to the image file.
-        width (int, optional): The width of the image in pixels.
-        height (int, optional): The height of the image in pixels.
-        image (PIL.Image, optional): The loaded PIL Image object.
-    Methods:
-        draw(draw_ctx, canvas_image, blend_settings): Renders the image onto the canvas with alpha blending.
-        apply_operation(operation): Applies a transformation operation to the image.
-        is_ready(): Checks if the image is loaded and ready to be drawn.
-        overlaps_region(x1, y1, x2, y2): Determines if a rectangular region overlaps with this image.
-        get_size(): Returns the dimensions of the image as a tuple.
+        width (int): The width of the image in pixels.
+        height (int): The height of the image in pixels.
+        image (PIL.Image.Image or None): The loaded PIL Image object in RGBA mode.
+    
     Example:
-        >>> img_element = ImageElement((100, 100), "path/to/image.png", width=500, height=300)
+        >>> img_element = ImageElement(
+        ...     position=(100, 100),
+        ...     image_path="path/to/image.png",
+        ...     width=500,
+        ...     height=300
+        ... )
         >>> img_element.is_ready()
         True
     """
     
     def __init__(self, position, image_path, width=None, height=None):
-        """
-        Initialize an Image element with position and optional dimensions.
+        """Initialize an ImageElement with position and optional dimensions.
+        
         Args:
-            position: The position of the image element on the poster.
-            image_path: Path to the image file to be loaded.
-            width (optional): The desired width of the image. Defaults to None (original width).
-            height (optional): The desired height of the image. Defaults to None (original height).
-        Attributes:
-            image_path: Stores the path to the image file.
-            width: The width of the image.
-            height: The height of the image.
-            image: The loaded image object, initially None until image is loaded.
+            position (tuple): The (x, y) coordinates of the image's top-left corner.
+            image_path (str): Path to the image file to be loaded.
+            width (int, optional): The desired width of the image. If None, uses original width. Defaults to None.
+            height (int, optional): The desired height of the image. If None, uses original height. Defaults to None.
         """
         super().__init__(position)
         self.image_path = image_path
