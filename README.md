@@ -130,7 +130,7 @@ layers:
         type: text
         rel_position:
           source: anchor
-          id: top_left
+          value: top_left
         values:
           text: --${title_text}--
           font_size: 64
@@ -140,7 +140,7 @@ layers:
         type: text
         rel_position:
           source: element
-          id: title
+          value: title
           offset:
             x: 0
             y: 50

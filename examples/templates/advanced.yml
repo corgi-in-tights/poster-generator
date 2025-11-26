@@ -1,0 +1,90 @@
+schema: "1.0"
+
+settings:
+  width: 1080
+  height: 1080
+  background_color: "#000000"
+
+anchors:
+  center:
+    x: 540
+    y: 540
+  overlay_start:
+    x: 270
+    y: 270
+
+layers:
+  background:
+    elements:
+      photo_bg:
+        type: image
+        position:
+          x: 0
+          y: 0
+        values:
+          image_path: --${background_image}--
+          width: 1080
+          height: 1080
+
+  overlay_panel:
+    elements:
+      main_panel:
+        type: rectangle
+        rel_position:
+          source: anchor
+          value: overlay_start
+        values:
+          width: 540
+          height: 540
+          background: "#3d9be3"
+          outline_color: null
+          outline_width: 0
+          radius: 10
+
+      tagline_text:
+        type: text
+        rel_position:
+          source: element
+          value: main_panel
+          offset:
+            x: 100
+            y: 100
+        values:
+          text: --${tagline_text}--
+          font_size: 36
+          color: "#FFFFFF"
+          max_width: 1000
+          wrap_style: "word"
+          text_alignment: "center"
+
+      title_text:
+        type: text
+        rel_position:
+          source: element
+          value: tagline_text
+          offset:
+            x: 0
+            y: 60
+        values:
+          text: --${title_text}--
+          font_size: 96
+          color: "#bc4841"
+          max_width: 1000
+          wrap_style: "word"
+          text_alignment: "center"
+
+      details_text:
+        type: text
+        rel_position:
+          source: element
+          value: title_text
+          offset:
+            x: 0
+            y: 80
+        values:
+          text: --${details_text}--
+          font_size: 32
+          color: "#FFFFFF"
+          max_width: 1000
+          wrap_style: "word"
+          text_alignment: "center"

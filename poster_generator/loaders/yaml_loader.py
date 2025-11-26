@@ -4,7 +4,6 @@ import yaml
 
 from .base import BaseCanvasLoader
 
-
 class YamlLoader(BaseCanvasLoader):
     """
     Canvas loader for YAML configuration files.
@@ -49,12 +48,13 @@ class YamlLoader(BaseCanvasLoader):
         # to avoid passing it around everywhere    
         self._variables = variables
             
-        settings = self._deserialize_settings(raw_data)
+        settings = self._temp_settings = self._deserialize_settings(raw_data)
         # anchors are a high-level loader construct for positioning
         anchors = self._deserialize_anchors(raw_data)
         layers = self._deserialize_layers(raw_data, anchors)
     
         self._variables = None
+        self._temp_settings = None
         
         return {
             "settings": settings,
@@ -176,31 +176,31 @@ class YamlLoader(BaseCanvasLoader):
                 # source can be other elements, anchors, etc.
                 # calculated here at loading time to avoid late errors
                 source = self.ensure_value(rel_position_info.get("source"))
-                source_id = self.ensure_value(rel_position_info.get("id"))
+                source_value = self.ensure_value(rel_position_info.get("value"))
 
                 offset_data = rel_position_info.get("offset", {"x": 0, "y": 0})
                 offset = self._parse_point(offset_data)
 
                 if source == "anchor":
-                    if source_id not in anchors:
+                    if source_value not in anchors:
                         raise ValueError(
-                            f"Anchor '{source_id}' not found for element '{element_id}'."
+                            f"Anchor '{source_value}' not found for element '{element_id}'."
                         )
-                    anchor_pos = anchors[source_id]
+                    anchor_pos = anchors[source_value]
                     position = (anchor_pos[0] + offset[0], anchor_pos[1] + offset[1])
                 elif source == "element":
                     # note: this requires that the referenced element has already been processed
                     # but this is a sacrifice im happy to make for simplicity
-                    if source_id not in deserialized_elements:
+                    if source_value not in deserialized_elements:
                         raise ValueError(
-                            f"Element '{source_id}' not found for relative positioning of element '{element_id}'."
+                            f"Element '{source_value}' not found for relative positioning of element '{element_id}'."
                         )
 
-                    ref_element_info = deserialized_elements[source_id]
+                    ref_element_info = deserialized_elements[source_value]
                     ref_position = ref_element_info.get("position")
                     if ref_position is None:
                         raise ValueError(
-                            f"Referenced element '{source_id}' does not have a defined position for element '{element_id}'."
+                            f"Referenced element '{source_value}' does not have a defined position for element '{element_id}'."
                         )
                     position = (
                         ref_position[0] + offset[0],

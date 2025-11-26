@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
+from ..snapping import get_alignment_position
 
 if TYPE_CHECKING:
     from PIL import Image, ImageDraw
+    from ..canvas import Canvas
     
 class DrawableElement(ABC):
     """Abstract base class for all drawable elements in a poster.
@@ -86,3 +88,24 @@ class DrawableElement(ABC):
             dy (float): Offset in the y-direction.
         """
         self.position = (self.position[0] + dx, self.position[1] + dy)
+        
+    def snap_to(self, canvas: "Canvas", x_align: str = "auto", y_align: str = "auto"):
+        if x_align not in ["auto", "left", "center", "right"]:
+            raise ValueError(f"Invalid x_align value: {x_align}")
+        if y_align not in ["auto", "top", "center", "bottom"]:
+            raise ValueError(f"Invalid y_align value: {y_align}")
+        
+        width, height = self.get_size()
+        
+        pos = get_alignment_position(
+            canvas.width,
+            canvas.height,
+            width,
+            height,
+            auto_x=self.position[0],
+            auto_y=self.position[1],
+            x_align=x_align,
+            y_align=y_align
+        )
+        
+        self.update_position(pos)

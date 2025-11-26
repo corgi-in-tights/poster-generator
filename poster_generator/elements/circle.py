@@ -17,7 +17,7 @@ class CircleElement(DrawableElement):
     Attributes:
         radius (int): Circle radius in pixels.
         background (str): background color as hex string (e.g., "#FF5733").
-        outline (str or None): Outline color as hex string, or None for no outline.
+        outline_color (str or None): Outline color as hex string, or None for no outline.
         outline_width (int): Width of the outline in pixels.
     
     Example:
@@ -33,7 +33,7 @@ class CircleElement(DrawableElement):
         ...     position=(200, 200),
         ...     radius=75,
         ...     background="#e74c3c",
-        ...     outline="#c0392b",
+        ...     outline_color="#c0392b",
         ...     outline_width=3
         ... )
     """
@@ -43,7 +43,7 @@ class CircleElement(DrawableElement):
         position,
         radius=50,
         background="#000000",
-        outline=None,
+        outline_color=None,
         outline_width=1
     ):
         """Initialize a CircleElement with specified radius and styling.
@@ -52,13 +52,13 @@ class CircleElement(DrawableElement):
             position (tuple): The (x, y) coordinates for the center of the circle.
             radius (int, optional): Radius of the circle in pixels. Defaults to 50.
             background (str, optional): background color as hex string. Defaults to "#000000".
-            outline (str, optional): Outline color as hex string. Defaults to None (no outline).
+            outline_color (str, optional): Outline color as hex string. Defaults to None (no outline).
             outline_width (int, optional): Width of the outline in pixels. Defaults to 1.
         """
         super().__init__(position)
         self.radius = radius
         self.background = background
-        self.outline = outline
+        self.outline_color = outline_color
         self.outline_width = outline_width
     
     def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict) -> None:
@@ -88,7 +88,7 @@ class CircleElement(DrawableElement):
         image_draw.ellipse(
             [(x1, y1), (x2, y2)],
             fill=self.background,
-            outline=self.outline,
+            outline=self.outline_color,
             width=self.outline_width
         )
     
@@ -177,14 +177,14 @@ class CircleElement(DrawableElement):
             "position": self.position,
             "radius": self.radius,
             "background": self.background,
-            "outline": self.outline,
+            "outline_color": self.outline_color,
             "outline_width": self.outline_width
         })
         
         self.position = result.get("position", self.position)
         self.radius = result.get("radius", self.radius)
         self.background = result.get("background", self.background)
-        self.outline = result.get("outline", self.outline)
+        self.outline_color = result.get("outline_color", self.outline_color)
         self.outline_width = result.get("outline_width", self.outline_width)
     
     def get_size(self):

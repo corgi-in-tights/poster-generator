@@ -32,7 +32,7 @@ layers:
           - headers
         rel_position:
           source: anchor
-          id: river
+          value: river
           offset:
             x: 20
             y: 20
@@ -47,7 +47,7 @@ layers:
           - subheaders
         rel_position:
           source: element
-          id: title1
+          value: title1
           offset:
             x: 0
             y: 30

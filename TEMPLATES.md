@@ -16,11 +16,11 @@ anchors: # Optional anchors for relative positioning
 
 layers:
   MY_LAYER_NAME:
-    settings: # Layer-related & blend settings, currently only opacity
-      opacity: # 0.0 to 1.0
+    settings: # Optional layer-related & blend settings, currently only opacity
+      opacity: # Optional opacity 0.0 to 1.0
     elements:
       MY_ELEMENT_ID:
-        type: # image | text | etc.
+        type: # rectangle | circle | image | text | etc.
         position: # or rel_position, atleast one is mandatory
           ...
         values:
@@ -45,21 +45,19 @@ anchors:
     y: 275
 layers:
   background:
-    settings:
-      opacity: 1
     elements:
-      full_bg:
-        type: image
+      partitioned_thing:
+        type: rectangle
         position:
-          x: 0
-          y: 0
+          x: 50
+          y: 50
         operations:
           apply_hue_shift:
             degrees: --${hue_shift}--
         values:
           image_path: --${background_image}--
-          width: 1080
-          height: 1350
+          width: 980
+          height: 1250
       title1:
         type: text
         groups:
@@ -67,7 +65,7 @@ layers:
           - headers
         rel_position:
           source: anchor
-          id: river
+          value: river
           offset:
             x: 20
             y: 20
@@ -82,7 +80,7 @@ layers:
           - subheaders
         rel_position:
           source: element
-          id: title1
+          value: title1
           offset:
             x: 0
             y: 30
@@ -103,8 +101,6 @@ settings:
   background_color: "#fff"
 layers:
   background:
-    settings:
-      opacity: 1
     elements:
       full_bg:
         type: image
@@ -125,7 +121,7 @@ layers:
           - headers
         rel_position:
           source: anchor
-          id: river
+          value: river
           offset:
             x: 20
             y: 20
@@ -140,7 +136,7 @@ layers:
           - subheaders
         rel_position:
           source: element
-          id: title1
+          value: title1
           offset:
             x: 0
             y: 30
@@ -196,17 +192,35 @@ layers:
     ELEMENT_ID2:
       ...
 ```
+
+### RectangleElement
+"type: rectangle"
+- width: Rectangle width in pixels
+- height: Rectangle height in pixels
+- background: Background color as hex string (e.g., "#FF5733")
+- outline_color: Outline color as hex string, or None for no outline
+- outline_width: Width of the outline in pixels
+- radius: Corner radius in pixels for rounded corners (0 for sharp corners)
+
+
+### CircleElement
+"type: circle"
+- radius: Circle radius in pixels.
+- background: background color as hex string (e.g., "#FF5733").
+- outline_color: Outline color as hex string, or None for no outline.
+- outline_width: Width of the outline in pixels.
+
   
 ### TextElement
-"type: text":
+"type: text"
 - text: A string containing what you want to be rendered
 - font_size: Size of text in pixels
 - font_path: Absolute path to .ttf containing font
 - color: Text color
 - max_width: None by default, if provided, wraps the word if curr_width > max_width
-- wrap_style: Either 'none', 'word' (default), 'char'. Wraps the sentence IF max_width is provided.
-- text_alignment: Either 'left' (default), 'center', or 'right'. Aligns text content in bbox.
-- other_kwargs - Mapping of arbitrary key: values passed to Pillow's `ImageDraw.Draw()`. For advanced users only.
+- wrap_style: Either 'none', 'word' (default), 'char'. Wraps the sentence IF max_width is provided
+- text_alignment: Either 'left' (default), 'center', or 'right'. Aligns text content in bbox
+- other_kwargs: Mapping of arbitrary key: values passed to Pillow's `ImageDraw.Draw()`. For advanced users only
 
 All values above are provided to operations.
 
@@ -223,8 +237,8 @@ The following text operations are provided by default:
 All values above are provided to operations including element.image which refers to the image that will be pasted at element.position.
 
 The following text operations are provided by default:
-- randomize_text_color
-
+- apply_hue_shift
+- set_hue_from_hex
 
 ### Element Operations
 
@@ -292,7 +306,7 @@ layers:
       ...
       rel_position:
         source: anchor
-        id: top_left
+        value: top_left
         offset:
           x: 20
           y: 30
@@ -305,27 +319,10 @@ Or to another element -- which must have been defined *before* this element.
 # Relative to another element
 rel_position:
   source: element
-  id: my_element_identifier
+  value: my_element_identifier
   offset:
     x: 0
     y: 10
-```
-
-Lastly, relative positions can also be done in alignment to the canvas. The format for the ID must be in `x-alignment`-`y-alignment`.
-
-x-alignment: auto, left, center, right
-y-alignment: auto, top, middle, bottom
-
-`auto` alignment means use the default position, useful when operations are used or as a way to keep it blank.
-
-```yaml
-# Relative to another element
-rel_position:
-  source: alignment
-  id: left-middle
-  offset:
-    x: -10
-    y: 5
 ```
 
 
