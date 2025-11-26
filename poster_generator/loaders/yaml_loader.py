@@ -1,40 +1,36 @@
 """YAML-based canvas configuration loader."""
 
+import logging
 import yaml
 
 from .base import BaseCanvasLoader
+from ..canvas import Canvas
+
+logger = logging.getLogger(__name__)
+
 
 class YamlLoader(BaseCanvasLoader):
     """
     Canvas loader for YAML configuration files.
     """
-    
+
     SCHEMA_VERSION = "1.0"
 
     def read_source(self, path: str) -> dict:
-        """
-        Load and parse a YAML file.
-        
-        Args:
-            path: Path to the YAML file.
-        
-        Returns:
-            dict: Parsed YAML data.
-        """
         with open(path, "r") as f:
             return yaml.safe_load(f)
 
-    def deserialize(self, raw_data: dict, variables: dict) -> dict:
+    def deserialize(self, raw_data: dict, variables: dict) -> Canvas:
         """
         Deserialize YAML data into a normalized canvas configuration.
-        
+
         Args:
             raw_data: Raw YAML data as a dictionary.
             variables: Dictionary for variable substitution.
-        
+
         Returns:
             dict: Normalized configuration with settings, anchors, and layers.
-        
+
         Raises:
             ValueError: If the schema version is unsupported.
         """
@@ -44,23 +40,54 @@ class YamlLoader(BaseCanvasLoader):
                 f"Unsupported schema version: {schema}. "
                 f"Current version is {YamlLoader.SCHEMA_VERSION}."
             )
-        
-        # to avoid passing it around everywhere    
+
+        # To avoid passing it around everywhere
         self._variables = variables
-            
-        settings = self._temp_settings = self._deserialize_settings(raw_data)
-        # anchors are a high-level loader construct for positioning
+
+        _settings = self._deserialize_settings(raw_data)
+
+        self._canvas = canvas = Canvas.from_dict(_settings)
+
         anchors = self._deserialize_anchors(raw_data)
-        layers = self._deserialize_layers(raw_data, anchors)
-    
+
+        layers_raw = raw_data.get("layers", {})
+        while len(layers_raw) > 0:
+            layer_name, raw_layer_data = next(iter(layers_raw.items()))
+            layer_data = self._parse_layer(raw_layer_data)
+
+            canvas.add_layer(layer_name, layer_data["settings"])
+
+            for element_id, element_data in layer_data["elements"].items():
+                element_info = self._parse_element(
+                    element_id, element_data, anchors, canvas.elements
+                )
+
+                groups = element_info.get("groups", [])
+                element = self.build_element(element_id, element_info)
+
+                # Resolve relative positions
+                if "rel_position" in element_info:
+                    pos = self._resolve_element_position(
+                        element_id,
+                        element,
+                        element_info["rel_position"],
+                        anchors,
+                        canvas,
+                    )
+                    element.update_position(pos)
+
+                canvas.add_element(
+                    element_id,
+                    element,
+                    groups=groups,
+                    layer=layer_name,
+                )
+
         self._variables = None
-        self._temp_settings = None
-        
-        return {
-            "settings": settings,
-            "layers": layers,
-        }
-        
+        self._canvas = None
+
+        return canvas
+
     def ensure_value(self, value):
         if (
             isinstance(value, str)
@@ -80,21 +107,13 @@ class YamlLoader(BaseCanvasLoader):
         settings_data = data.get("settings", {})
         width = int(self.ensure_value(settings_data.get("width", 1080)))
         height = int(self.ensure_value(settings_data.get("height", 1350)))
-        background = self.ensure_value(settings_data.get("background_color", "#fff"))
-
+        background = self.ensure_value(settings_data.get("background", "#fff"))
         return {"width": width, "height": height, "background": background}
 
     def _parse_point(self, point_data):
         if isinstance(point_data, dict):
-            x = int(self.ensure_value(point_data.get("x")))
-            y = int(self.ensure_value(point_data.get("y")))
-
-            if x is None or y is None:
-                raise ValueError(
-                    f"Invalid point data, \
-                                    expected x, y integers: {point_data}"
-                )
-
+            x = int(self.ensure_value(point_data.get("x", 0)))
+            y = int(self.ensure_value(point_data.get("y", 0)))
             return (x, y)
         elif isinstance(point_data, list) and len(point_data) == 2:
             return (int(point_data[0]), int(point_data[1]))
@@ -117,34 +136,23 @@ class YamlLoader(BaseCanvasLoader):
 
         return layers
 
-    def _parse_layer(self, layer_data: dict, anchors: dict):
-        # clamp to [0.0, 1.0]
+    def _parse_layer(self, layer_data: dict):
+        raw_settings = layer_data.get("settings", {})
+
         opacity = max(
-            0.0, min(1.0, float(self.ensure_value(layer_data.get("opacity", 1))))
+            0.0, min(1.0, float(self.ensure_value(raw_settings.get("opacity", 1))))
         )
-
-        elements = layer_data.get("elements", {})
-        deserialized_elements = {}
-
-        for element_id, element_info in elements.items():
-            deserialized_elements[element_id] = self._parse_element(
-                element_id, element_info, anchors, deserialized_elements
-            )
 
         return {
-            "opacity": opacity,
-            "elements": deserialized_elements,
+            "settings": {"opacity": opacity},
+            "elements": layer_data.get("elements", {}),
         }
 
-    def _parse_element(self, element_id, element_data, anchors, deserialized_elements):
+    def _parse_element(self, element_id, element_data):
         # type is image, text, shape, etc.
-        element_type = element_data.get("type")
+        element_type = element_data["type"]
 
         groups = element_data.get("groups", [])
-
-        position = self._calculate_element_position(
-            element_id, element_data, anchors, deserialized_elements
-        )
 
         values = {
             k: self.ensure_value(v) for k, v in element_data.get("values", {}).items()
@@ -155,60 +163,76 @@ class YamlLoader(BaseCanvasLoader):
             for k, v in element_data.get("operations", {}).items()
         }
 
-        return {
+        element_info = {
             "type": element_type,
             "groups": groups,
-            "position": position,
             "values": values,
             "operations": operations,
         }
 
-    def _calculate_element_position(
-        self, element_id, element_data, anchors, deserialized_elements
+        # Calculate it later to support size-based alignments
+        if "position" in element_data:
+            element_info["position"] = self._parse_point(element_data.get("position"))
+        elif "rel_position" in element_data:
+            r = element_data.get("rel_position")
+            rd = {}
+
+            rd["source"] = self.ensure_value(r.get("source"))
+            rd["value"] = self.ensure_value(r.get("value"))
+            rd["offset"] = self._parse_point(r.get("offset", {"x": 0, "y": 0}))
+            rd["parent"] = self.ensure_value(r.get("parent", None))
+
+            element_info["rel_position"] = rd
+
+        return element_info
+
+    def _resolve_element_position(
+        self,
+        element_id: str,
+        element,
+        rel_position_info: dict,
+        anchors: dict,
+        canvas: Canvas,
     ):
-        # position (or rel position if available)
-        _position_data = element_data.get("position")
-        position = self._parse_point(_position_data) if _position_data else None
+        source = rel_position_info["source"]
+        value = rel_position_info["value"]
+        offset = rel_position_info.get("offset", (0, 0))
 
-        if not position:
-            rel_position_info = element_data.get("rel_position")
-            if rel_position_info:
-                # source can be other elements, anchors, etc.
-                # calculated here at loading time to avoid late errors
-                source = self.ensure_value(rel_position_info.get("source"))
-                source_value = self.ensure_value(rel_position_info.get("value"))
+        if source == "anchor":
+            if value not in anchors:
+                raise ValueError(
+                    f"For element {element_id}, anchor '{value}' was not found'."
+                )
+            anchor_pos = anchors.get(value)
+            position = (anchor_pos[0], anchor_pos[1])
 
-                offset_data = rel_position_info.get("offset", {"x": 0, "y": 0})
-                offset = self._parse_point(offset_data)
+        elif source == "element":
+            if value not in canvas.elements:
+                raise ValueError(
+                    f"Element '{value}' not found for relative positioning of element '{element_id}'."
+                )
 
-                if source == "anchor":
-                    if source_value not in anchors:
-                        raise ValueError(
-                            f"Anchor '{source_value}' not found for element '{element_id}'."
-                        )
-                    anchor_pos = anchors[source_value]
-                    position = (anchor_pos[0] + offset[0], anchor_pos[1] + offset[1])
-                elif source == "element":
-                    # note: this requires that the referenced element has already been processed
-                    # but this is a sacrifice im happy to make for simplicity
-                    if source_value not in deserialized_elements:
-                        raise ValueError(
-                            f"Element '{source_value}' not found for relative positioning of element '{element_id}'."
-                        )
+            ref_element_info = canvas.get_first_element(identifier=value)
+            position = (
+                ref_element_info.position[0],
+                ref_element_info.position[1],
+            )
 
-                    ref_element_info = deserialized_elements[source_value]
-                    ref_position = ref_element_info.get("position")
-                    if ref_position is None:
-                        raise ValueError(
-                            f"Referenced element '{source_value}' does not have a defined position for element '{element_id}'."
-                        )
-                    position = (
-                        ref_position[0] + offset[0],
-                        ref_position[1] + offset[1],
-                    )
-                else:
-                    raise ValueError(
-                        f"Unsupported relative position source '{source}' for element '{element_id}'."
-                    )
+        elif source == "alignment":
+            position = element.get_alignment_position(
+                canvas,
+                parent_element_id=rel_position_info.get("parent", None),
+                x_align=value.get("x_align", "auto"),
+                y_align=value.get("y_align", "auto"),
+            )
+
+        else:
+            msg = f"For element {element_id}, unsupported relative position source '{source}'."
+            raise ValueError(msg)
+
+        position = (
+            position[0] + offset[0],
+            position[1] + offset[1],
+        )
 
         return position

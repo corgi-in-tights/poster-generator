@@ -1,10 +1,8 @@
 import logging
 from PIL import Image, ImageDraw
 
-from .elements.factory import get_factory
-from .operations.factory import get_operation_factory
-
 logger = logging.getLogger(__name__)
+
 
 class Canvas:
     """
@@ -44,6 +42,18 @@ class Canvas:
         self._image = Image.new("RGB", (self.width, self.height), self.background)
         self._draw = ImageDraw.Draw(self._image)
 
+    def add_layer(self, layer_name, settings=None):
+        """
+        Add a new layer to the canvas.
+
+        Args:
+            layer_name: Name of the layer to add.
+            settings: Optional dictionary of layer settings containing:
+                - opacity: Float between 0.0 and 1.0 for layer opacity.
+        """
+        if layer_name not in self.layers:
+            self.layers[layer_name] = {"settings": settings or {}, "elements": []}
+
     def add_element(self, identifier, element, groups=None, layer="default"):
         """
         Add an element to the canvas with optional layer and group membership.
@@ -80,6 +90,8 @@ class Canvas:
             if group not in self.groups:
                 self.groups[group] = set()
             self.groups[group].add(identifier)
+
+        element.bind_canvas(self, identifier)
 
     def remove_element(self, identifier):
         """
@@ -132,6 +144,15 @@ class Canvas:
             identifiers = list(self.groups[group])  # copy
             self.remove_elements(identifiers)
             del self.groups[group]
+
+    def get_first_element(self, *, identifier=None, groups=None, layers=None):
+        elements = self.get_elements(
+            identifiers=[identifier] if identifier is not None else None,
+            groups=groups,
+            layers=layers,
+            require_all=True,
+        )
+        return elements[0] if elements else None
 
     def get_elements(
         self, *, identifiers=None, groups=None, layers=None, require_all=False
@@ -195,7 +216,7 @@ class Canvas:
     def crop(self, x1: float, y1: float, x2: float, y2: float):
         """
         Crop the canvas image to the specified box.
-        
+
         WARNING: This is a destructive operation that modifies the canvas size
         and removes any elements outside the crop region.
 
@@ -209,7 +230,7 @@ class Canvas:
         self._image = self._image.crop(box)
         self.width, self.height = self._image.size
         self._draw = ImageDraw.Draw(self._image)
-        
+
         # remove elements that are out of bounds
         to_remove = []
         for identifier, element in self.elements.items():
@@ -256,96 +277,6 @@ class Canvas:
                 logger.error(
                     f"Element '{identifier}' in layer {layer_name} is not ready and will be skipped."
                 )
-
-    def populate_layer_by_info(self, name: str, layer_info: dict):
-        """
-        Populate a layer with elements from a structured dictionary.
-
-        Creates elements from the provided layer information and adds them to the canvas.
-        The layer_info dictionary should contain settings (e.g., opacity) and an elements
-        dictionary with element configurations.
-
-        Args:
-            name: Name of the layer to populate.
-            layer_info: Dictionary containing layer configuration with structure:
-                {
-                    "opacity": 1.0,
-                    "elements": {
-                        "element_id": {
-                            "type": "text",
-                            "position": (x, y),
-                            "values": {...},
-                            "operations": {...},
-                            "groups": [...]
-                        },
-                        ...
-                    }
-                }
-        """
-        logger.debug(f"CANVAS: Populating layer '{name}' with elements")
-
-        settings = {}
-        elements = layer_info.get("elements", {})
-
-        # Extract settings (e.g. opacity)
-        for k, v in layer_info.items():
-            if k != "elements":
-                settings[k] = v
-
-        # Create layer record
-        if name not in self.layers:
-            self.layers[name] = {"settings": settings, "elements": []}
-
-        # Build all elements under this layer
-        for identifier, element_info in elements.items():
-            logger.debug("CANVAS: Iterating element: %s %r", identifier, element_info)
-
-            groups = element_info.get("groups", [])
-            element = self._build_element(element_info)
-            self.add_element(identifier, element, groups=groups, layer=name)
-
-    def _build_element(self, element_info: dict):
-        """
-        Convert YAML dict into an Element instance.
-
-        Format:
-        {
-            "type": "text",
-            "position": (x, y),
-            "values": {...},
-            optional "operations": {...}
-        }
-        """
-        element_type = element_info.get("type")
-
-        element = get_factory().create_element(
-            element_type,
-            position=element_info.get("position"),
-            values=element_info.get("values", {}),
-        )
-
-        # apply operations
-        operations = element_info.get("operations", {})
-        factory = get_operation_factory()
-
-        for op_name, op_params in operations.items():
-            op_entry = factory.get_operation(op_name)
-            if op_entry is None:
-                logger.error(f"Operation '{op_name}' not found in factory.")
-                continue
-
-            if element_type not in op_entry["supported_types"]:
-                logger.error(
-                    f"Operation '{op_name}' not supported for element type '{element_type}'."
-                )
-                continue
-
-            operation = op_entry["func"]
-            element.apply_operation(
-                lambda img, op=operation, params=op_params: op(img, **params)
-            )
-
-        return element
 
     @staticmethod
     def from_dict(data: dict) -> "Canvas":

@@ -40,11 +40,11 @@ class TextElement(DrawableElement):
         ...     wrap_style="word",
         ...     color="#FF0000"
         ... )
-        >>> my_text.update_text("New text content")
+        >>> my_text.set_text("New text content")
     """
     font_cache = {}
     
-    def __init__(self, position, text="", font_path=None, font_size=20, max_width=None, wrap_style="word", text_alignment="left", color="#000"):
+    def __init__(self, position=(0, 0), text="", font_path=None, font_size=20, max_width=None, wrap_style="word", text_alignment="left", color="#000"):
         """Initialize a TextElement with specified properties.
         
         Args:
@@ -66,7 +66,7 @@ class TextElement(DrawableElement):
         self.text_alignment = text_alignment
         
         self._reset_font()
-        self.update_text(text)
+        self.set_text(text)
         
     def _reset_font(self):
         """Reset the font object based on current font_path and font_size."""
@@ -79,7 +79,27 @@ class TextElement(DrawableElement):
             self.font = ImageFont.truetype(self.font_path, self.font_size)
             TextElement.font_cache[(self.font_path, self.font_size)] = self.font
     
-    def update_text(self, t: str):
+    def set_font_size(self, font_size: int):
+        """
+        Set the font size and update the font object.
+        
+        Args:
+            font_size (int): The new font size in points.
+        """
+        self.font_size = font_size
+        self._reset_font()
+        
+    def set_font_path(self, font_path: str):
+        """
+        Set the font path and update the font object.
+        
+        Args:
+            font_path (str): The new font file path.
+        """
+        self.font_path = font_path
+        self._reset_font()
+        
+    def set_text(self, t: str):
         """
         Set the text content of the TextElement, applying wrapping if necessary.
         
@@ -195,37 +215,4 @@ class TextElement(DrawableElement):
                     x1 > self.position[0] + width or
                     y2 < self.position[1] or
                     y1 > self.position[1] + height)
-    
-    
-    def apply_operation(self, operation):
-        old_font_size = self.font_size
-        old_font_path = self.font_path
-        
-        result = operation({
-            "position": self.position,
-            "text": self.text,
-            "font_size": self.font_size,
-            "font_path": self.font_path,
-            "color": self.color,
-            "max_width": self.max_width,
-            "wrap_style": self.wrap_style,
-            "text_alignment": self.text_alignment
-        })
-        self.update_position(result.get("position", self.position))
-        self.font_size = result["font_size"]
-        self.font_path = result["font_path"]
-        self.color = result["color"]
-        self.max_width = result["max_width"]
-        self.wrap_style = result["wrap_style"]
-        self.text_alignment = result["text_alignment"]
-        
-        # update font if it changed
-        if old_font_size != self.font_size or old_font_path != self.font_path:
-            self._reset_font()
-
-        if (result["text"] != self.text or
-            self.max_width != result["max_width"] or 
-            self.wrap_style != result["wrap_style"] or
-            self.text_alignment != result["text_alignment"]):
             
-            self.update_text(result["text"])

@@ -43,7 +43,7 @@ class RectangleElement(DrawableElement):
     
     def __init__(
         self,
-        position,
+        position=(0, 0),
         width=100,
         height=100,
         background="#000000",
@@ -153,40 +153,3 @@ class RectangleElement(DrawableElement):
             rect_y2 < y1 or  # Rectangle is above region
             rect_y1 > y2     # Rectangle is below region
         )
-    
-    def apply_operation(self, operation):
-        """
-        Apply a transformation operation to the rectangle.
-        
-        Note: This is a placeholder for interface compatibility.
-        Rectangles are vector shapes and don't support image operations.
-        
-        Args:
-            operation: Callable that would transform the element (not applicable to rectangles).
-        """
-        result = operation({
-            "position": self.position,
-            "width": self.width,
-            "height": self.height,
-            "background": self.background,
-            "outline_color": self.outline_color,
-            "outline_width": self.outline_width,
-            "radius": self.radius
-        })
-        
-        self.position = result.get("position", self.position)
-        self.width = result.get("width", self.width)
-        self.height = result.get("height", self.height)
-        self.background = result.get("background", self.background)
-        self.outline_color = result.get("outline", self.outline_color)
-        self.outline_width = result.get("outline_width", self.outline_width)
-        self.radius = result.get("radius", self.radius)
-    
-    def get_size(self):
-        """
-        Get the dimensions of the rectangle.
-        
-        Returns:
-            tuple: (width, height) of the rectangle.
-        """
-        return (self.width, self.height)

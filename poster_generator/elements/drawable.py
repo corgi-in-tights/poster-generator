@@ -17,13 +17,29 @@ class DrawableElement(ABC):
         position (tuple): The (x, y) coordinates of the element on the canvas.
     """
     
-    def __init__(self, position):
+    def __init__(self, position=(0, 0)):
         """Initialize a DrawableElement with a position.
         
         Args:
             position (tuple): The (x, y) coordinates for the element.
         """
         self.position = position
+    
+    def bind_canvas(self, canvas: "Canvas", identifier: str):
+        """
+        Bind the drawable element to a specific canvas. This should be called when
+        the element is added to the canvas.
+        
+        NOTE: This method breaks the previous connected canvas-element relationship
+        if called multiple times with different canvases and the values should only 
+        be used when absolutely necessary.
+
+        Args:
+            canvas (Canvas): The canvas to bind the element to.
+            identifier (str): The unique identifier of the element within the canvas.
+        """
+        self._identifier = identifier
+        self._canvas = canvas
     
     @abstractmethod
     def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict) -> None:
@@ -55,9 +71,14 @@ class DrawableElement(ABC):
         eps = 1e-5
         return self.overlaps_region(x, y, x + eps, y + eps)
 
-    @abstractmethod
     def apply_operation(self, operation):
-        pass
+        """
+        Apply a transformation operation to the drawable element.
+        
+        Args:
+            operation: Callable that takes a DrawableElement and modifies it.
+        """
+        operation(self)
     
     @abstractmethod
     def get_size(self):
@@ -87,9 +108,18 @@ class DrawableElement(ABC):
             dx (float): Offset in the x-direction.
             dy (float): Offset in the y-direction.
         """
-        self.position = (self.position[0] + dx, self.position[1] + dy)
+        self.update_position((self.position[0] + dx, self.position[1] + dy))
         
-    def snap_to(self, canvas: "Canvas", x_align: str = "auto", y_align: str = "auto"):
+    def align_to(self, canvas: "Canvas", parent_element_id: str = None, x_align: str = "auto", y_align: str = "auto"):        
+        pos = get_alignment_position(
+            canvas,
+            parent_element_id=parent_element_id,
+            x_align=x_align,
+            y_align=y_align
+        )
+        self.update_position(pos)
+
+    def get_alignment_position(self, canvas: "Canvas", parent_element_id: str = None, x_align: str = "auto", y_align: str = "auto"):
         if x_align not in ["auto", "left", "center", "right"]:
             raise ValueError(f"Invalid x_align value: {x_align}")
         if y_align not in ["auto", "top", "center", "bottom"]:
@@ -97,15 +127,39 @@ class DrawableElement(ABC):
         
         width, height = self.get_size()
         
+        if parent_element_id is None:
+            parent_width, parent_height = canvas.width, canvas.height
+            parent_x, parent_y = 0, 0
+        else:
+            parent_element = canvas.get_first_element(identifier=parent_element_id)
+            if parent_element is None:
+                msg = f"Parent element '{parent_element_id}' not found for alignment."
+                raise ValueError(msg)
+            
+            parent_width, parent_height = parent_element.get_size()
+            parent_x, parent_y = parent_element.position
+        
         pos = get_alignment_position(
-            canvas.width,
-            canvas.height,
+            parent_width,
+            parent_height,
             width,
             height,
+            parent_x=parent_x,
+            parent_y=parent_y,
             auto_x=self.position[0],
             auto_y=self.position[1],
             x_align=x_align,
             y_align=y_align
         )
         
-        self.update_position(pos)
+        return pos
+
+    def copy(self):
+        """
+        Create a copy of the drawable element.
+
+        Returns:
+            DrawableElement: A new instance that is a copy of this element.
+        """
+        import copy
+        return copy.deepcopy(self)

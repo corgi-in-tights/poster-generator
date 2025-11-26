@@ -1,5 +1,6 @@
 from PIL import Image
 from .drawable import DrawableElement
+import os
 
 class ImageElement(DrawableElement):
     """A drawable element that represents an image on the poster canvas.
@@ -24,7 +25,7 @@ class ImageElement(DrawableElement):
         True
     """
     
-    def __init__(self, position, image_path, width=None, height=None):
+    def __init__(self, image_path, position=(0, 0), width=None, height=None):
         """Initialize an ImageElement with position and optional dimensions.
         
         Args:
@@ -34,36 +35,31 @@ class ImageElement(DrawableElement):
             height (int, optional): The desired height of the image. If None, uses original height. Defaults to None.
         """
         super().__init__(position)
-        self.image_path = image_path
         self.width = width
         self.height = height
-        
         self.image = None
-        if image_path:
-            self._load_image(image_path)
-
-    def resize_image(self, new_width, new_height):
-        if new_width == self.width and new_height == self.height:
-            return
         
+        if image_path and os.path.isfile(image_path):
+            self.update_image_path(image_path)
+            self.resize_image(self.width, self.height)
+        else:
+            raise ValueError(f"Image path '{image_path}' is invalid or does not exist.")
+        
+    def resize_image(self, new_width, new_height):       
         self.image = self.image.resize((new_width, new_height))
         self.width = new_width
         self.height = new_height
 
-    def _load_image(self, image_path):
-        self.image_path = image_path
-        self.image = Image.open(image_path).convert("RGBA")
+    def update_image_path(self, new_path, set_size=True):
+        self.image_path = new_path
+        self.image = Image.open(new_path).convert("RGBA")
         
         # Set from image for any missing attributes
-        if self.width is None:
+        if set_size or self.width is None:
             self.width = self.image.width
-        if self.height is None:
+        if set_size or self.height is None:
             self.height = self.image.height
-            
-        self.image = self.image.resize((self.width, self.height))
-        
 
-        
     def draw(self, draw_ctx, canvas_image, blend_settings: dict):
         """
         Draw the image onto the canvas with alpha blending.
@@ -88,38 +84,6 @@ class ImageElement(DrawableElement):
         out = self.image.split()
         canvas_image.paste(self.image, (*self.position, *pos2), out[3])
 
-    def apply_operation(self, operation):
-        """
-        Apply a transformation operation to the image.
-        
-        Args:
-            operation: Callable that takes a PIL Image and returns a transformed PIL Image.
-        """
-        old_image_path = self.image_path
-        old_width = self.width
-        old_height = self.height
-        
-        res = operation({
-            "position": self.position,
-            "image": self.image,
-            "image_path": self.image_path,
-            "width": self.width,
-            "height": self.height
-        })
-        self.update_position(res.get("position", self.position))
-        self.image = res.get("image", self.image)
-        self.width = res.get("width", self.width)
-        self.height = res.get("height", self.height)
-        self.image_path = res.get("image_path", self.image_path)
-        
-        # If any sensitive values change, reload the loaded image
-        if old_image_path != self.image_path:
-            self._load_image(self.image_path)
-        
-        if self.image_path != old_image_path or self.width != old_width or self.height != old_height:
-            self.resize_image(self.width, self.height)
-        
-        
     def is_ready(self):
         """
         Check if the image element is ready to be drawn.

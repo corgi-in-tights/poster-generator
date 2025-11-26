@@ -40,7 +40,7 @@ class CircleElement(DrawableElement):
     
     def __init__(
         self,
-        position,
+        position=(0, 0),
         radius=50,
         background="#000000",
         outline_color=None,
@@ -55,7 +55,7 @@ class CircleElement(DrawableElement):
             outline_color (str, optional): Outline color as hex string. Defaults to None (no outline).
             outline_width (int, optional): Width of the outline in pixels. Defaults to 1.
         """
-        super().__init__(position)
+        super().__init__(position=position)
         self.radius = radius
         self.background = background
         self.outline_color = outline_color
@@ -162,30 +162,6 @@ class CircleElement(DrawableElement):
         radius_squared = self.radius ** 2
         
         return distance_squared <= radius_squared
-    
-    def apply_operation(self, operation):
-        """
-        Apply a transformation operation to the circle.
-        
-        Note: This is a placeholder for interface compatibility.
-        Circles are vector shapes and don't support image operations.
-        
-        Args:
-            operation: Callable that would transform the element (not applicable to circles).
-        """
-        result = operation({
-            "position": self.position,
-            "radius": self.radius,
-            "background": self.background,
-            "outline_color": self.outline_color,
-            "outline_width": self.outline_width
-        })
-        
-        self.position = result.get("position", self.position)
-        self.radius = result.get("radius", self.radius)
-        self.background = result.get("background", self.background)
-        self.outline_color = result.get("outline_color", self.outline_color)
-        self.outline_width = result.get("outline_width", self.outline_width)
     
     def get_size(self):
         """
