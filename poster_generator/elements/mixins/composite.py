@@ -32,7 +32,7 @@ class CompositeElementMixin(ABC):
             if opacity_modifier < 1.0 or params.get("has_alpha", True):
                 self.apply_alpha_composites(image, params=params, opacity_modifier=opacity_modifier)
             else:
-                self.draw_composite(image_draw, **params)
+                self.draw_composite(image_draw, image, **params)
 
     @abstractmethod
     def draw_composite(

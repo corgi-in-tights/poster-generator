@@ -4,6 +4,8 @@ import copy
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from poster_generator.utils import get_alignment_position
+
 if TYPE_CHECKING:
     from PIL import Image, ImageDraw
 
@@ -28,8 +30,9 @@ class DrawableElement(ABC):
             position (tuple): The (x, y) coordinates for the element.
         """
         if position is None:
-            position = (0, 0)
-        self.position = position
+            self.position = (0, 0)
+        else:
+            self.position = (int(position[0]), int(position[1]))
 
     def bind_canvas(self, canvas: Canvas, identifier: str):
         """
@@ -77,14 +80,14 @@ class DrawableElement(ABC):
         eps = 1e-5
         return self.overlaps_region(x, y, x + eps, y + eps)
 
-    def apply_operation(self, operation, params):
+    def apply_operation(self, operation, **kwargs):
         """
         Apply a transformation operation to the drawable element.
 
         Args:
             operation: Callable that takes a DrawableElement and modifies it.
         """
-        operation(self, **params)
+        operation(self, **kwargs)
 
     @abstractmethod
     def get_size(self):
@@ -117,55 +120,27 @@ class DrawableElement(ABC):
 
     def align_to(
         self,
-        parent_element: DrawableElement | str | None = None,
         x_align: float | None = None,
         y_align: float | None = None,
+        parent_element: DrawableElement | str | None = None,
         canvas = None,
     ):
+        canvas = canvas or self._canvas
         if isinstance(parent_element, str):
             parent_element = canvas.get_first_element(identifier=parent_element)
-        if parent_element is None:
-            msg = f"Parent element '{parent_element}' not found for alignment."
-            raise ValueError(msg)
+            if parent_element is None:
+                msg = f"Parent element '{parent_element}' not found for alignment."
+                raise ValueError(msg)
 
-        pos = self.get_alignment_position(
-            canvas=canvas or self._canvas,
-            parent_element=parent_element,
+        pos = get_alignment_position(
+            element_size=self.get_size(),
+            parent_size=parent_element.get_size() if parent_element else (self._canvas.width, self._canvas.height),
             x_align=x_align,
             y_align=y_align,
+            parent_position=parent_element.position if parent_element else (0, 0),
+            original_position=self.position,
         )
         self.update_position(pos)
-
-    def get_alignment_position(
-        self,
-        canvas: Canvas,
-        parent_element: DrawableElement | None = None,
-        x_align: float | None = None,
-        y_align: float | None = None,
-    ):
-        width, height = self.get_size()
-
-        if parent_element is None:
-            parent_width, parent_height = canvas.width, canvas.height
-            parent_x, parent_y = 0, 0
-        else:
-            parent_width, parent_height = parent_element.get_size()
-            parent_x, parent_y = parent_element.position
-
-        default_x = self.position[0]
-        default_y = self.position[1]
-
-        new_x = (
-            default_x if x_align is None
-            else x_align * (parent_width - width) + parent_x
-        )
-        new_y = (
-            default_y if y_align is None
-            else y_align * (parent_height - height) + parent_y
-        )
-
-        return (new_x, new_y)
-
 
     def copy(self):
         """

@@ -39,6 +39,7 @@ class RectangleElement(ShapeElement):
 
     def __init__(
         self,
+        *,
         border_radius=0,
         other_position=None,
         **kwargs,

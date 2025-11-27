@@ -28,7 +28,7 @@ class ImageElement(DrawableElement):
         True
     """
 
-    def __init__(self, image_path=None, position=(0, 0), width=None, height=None):
+    def __init__(self, *, image_path=None, position=(0, 0), width=None, height=None):
         """Initialize an ImageElement with position and optional dimensions.
 
         Args:

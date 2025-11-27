@@ -1,5 +1,4 @@
-from .image import apply_hue_shift
-from .image import set_hue_from_hex
+from .image import apply_hue_shift, set_hue_from_hex
 from .text import randomize_text_color
 
 __all__ = [

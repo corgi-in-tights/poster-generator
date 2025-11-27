@@ -54,6 +54,7 @@ class TextElement(DrawableElement):
 
     def __init__(  # noqa: PLR0913
         self,
+        *,
         position=(0, 0),
         text="",
         font_path=None,
@@ -202,7 +203,7 @@ class TextElement(DrawableElement):
         width = bbox[2] - bbox[0]
         height = bbox[3] - bbox[1]
 
-        return (width, height)
+        return (width, height*1.5)
 
     def draw(self, draw: "ImageDraw.Draw", _, blend_settings: dict | None = None):
         """
@@ -238,3 +239,4 @@ class TextElement(DrawableElement):
             or y2 < self.position[1]
             or y1 > self.position[1] + height
         )
+

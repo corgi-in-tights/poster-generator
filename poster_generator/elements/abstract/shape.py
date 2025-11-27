@@ -10,6 +10,7 @@ from .drawable import DrawableElement
 class ShapeElement(CompositeElementMixin, DrawableElement, ABC):
     def __init__(
         self,
+        *,
         width=None,
         height=None,
         fill=None,
@@ -18,8 +19,8 @@ class ShapeElement(CompositeElementMixin, DrawableElement, ABC):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.width = width
-        self.height = height
+        self.width = int(width) if width is not None else None
+        self.height = int(height) if height is not None else None
         self.fill = fill
         self.outline = outline
         self.outline_width = outline_width
@@ -27,26 +28,7 @@ class ShapeElement(CompositeElementMixin, DrawableElement, ABC):
     def get_composite_params(self):
         params = []
         should_alpha_fill = self.fill and self.should_alpha_composite(self.fill)
-        should_alpha_outline = self.outline and self.outline_width > 0 and self.should_alpha_composite(self.outline)
-
-        if should_alpha_fill:
-            params.append(
-                {
-                    "fill": self.fill,
-                    "outline": None,
-                    "outline_width": 0,
-                },
-            )
-
-        # Essentially, if there is an outline, we need to draw it separately regardless
-        if should_alpha_fill or should_alpha_outline:
-            params.append(
-                {
-                    "fill": None,
-                    "outline": self.outline,
-                    "outline_width": self.outline_width,
-                },
-            )
+        should_alpha_outline = self.should_alpha_composite(self.outline)
 
         if not should_alpha_fill and not should_alpha_outline:
             params.append(
@@ -57,6 +39,26 @@ class ShapeElement(CompositeElementMixin, DrawableElement, ABC):
                     "outline_width": self.outline_width,
                 },
             )
+        else:
+            if self.fill:
+                params.append(
+                    {
+                        "fill": self.fill,
+                        "outline": None,
+                        "outline_width": 0,
+                        "has_alpha": should_alpha_fill,
+                    },
+                )
+
+            if self.outline and self.outline_width > 0:
+                params.append(
+                    {
+                        "fill": None,
+                        "outline": self.outline,
+                        "outline_width": self.outline_width,
+                        "has_alpha": should_alpha_outline,
+                    },
+                )
 
         return params
 

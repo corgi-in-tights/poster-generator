@@ -317,3 +317,12 @@ class Canvas:
         background = data.get("background", "#fff")
 
         return Canvas(width=width, height=height, background=background)
+
+    def get_size(self):
+        """
+        Get the size of the canvas.
+
+        Returns:
+            (width, height): Tuple of canvas width and height in pixels.
+        """
+        return (self.width, self.height)

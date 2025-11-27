@@ -36,9 +36,6 @@ class EllipseElement(ShapeElement):
         ... )
     """
 
-    def __init__(self, width=None, height=None, **kwargs):
-        super().__init__(**kwargs)
-
     def draw_composite(self, image_draw, image, **kwargs):
         x, y = self.position
 

@@ -7,6 +7,7 @@ import yaml
 
 from poster_generator.canvas import Canvas
 from poster_generator.loaders.base import BaseCanvasLoader
+from poster_generator.utils import get_alignment_position
 
 from .resolver import YamlResolver
 
@@ -264,11 +265,13 @@ class YamlLoader(BaseCanvasLoader):
         parent_element_id = rel_position_info.get("parent")
         parent_element = canvas.get_first_element(identifier=parent_element_id) if parent_element_id else None
 
-        return element.get_alignment_position(
-            canvas,
-            parent_element=parent_element,
+        return get_alignment_position(
+            element_size=element.get_size(),
+            parent_size=parent_element.get_size() if parent_element else canvas.get_size(),
             x_align=x_align,
             y_align=y_align,
+            parent_position=parent_element.position if parent_element else (0, 0),
+            original_position=element.position,
         )
 
     def post_build_element(self, element_id, element, canvas, element_info, deserialized_info):

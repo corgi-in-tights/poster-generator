@@ -1,29 +1,30 @@
-from poster_generator import Canvas, TextElement, CircleElement
+from poster_generator import Canvas, TextElement, RectangleElement
 
 width = 1080
-height = 1350
+height = 1080
 
-canvas = Canvas(width=width, height=height, background="#c75d5d")
+canvas = Canvas(width=width, height=height, background="#5e4444")
 
 
-bg = CircleElement(
-    (width//2, height//2),
-    radius=(width-128)//2,
-    fill="#7C2F0B",
-    outline="#FFFFFF",
+bg = RectangleElement(
+    width=(width-128)//2,
+    height=(height-128)//2,
+    fill="#59473F",
+    outline="#3F2E2E",
     outline_width=8,
 )
 canvas.add_element("bg", bg)
+bg.align_to(x_align=0.5, y_align=0.5)
 
 
 text_element = TextElement(
-    (0, 0),
     text="Hello, Poster!",
     font_size=64,
-    fill="#333333",
+    fill="#FFFFFF",
 )
 canvas.add_element("title", text_element)
-text_element.align_to(x_align="center", y_align="center")
+text_element.align_to(x_align=0.5, y_align=0.5)
+print(text_element.get_size(), text_element.position)
 
 
 image = canvas.render()
