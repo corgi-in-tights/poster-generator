@@ -58,6 +58,12 @@ class YamlLoader(BaseCanvasLoader):
 
         deserialized_info["layers"], deserialized_info["elements"] = self._deserialize_layers_elements(data)
 
+        logger.debug(
+            "Deserialized %i layers and %i elements.",
+            len(deserialized_info["layers"]),
+            len(deserialized_info["elements"]),
+        )
+
         self.yaml_resolver = None
         self.resolve_variable = None
 
@@ -92,6 +98,8 @@ class YamlLoader(BaseCanvasLoader):
             for element_id, element_data in elements_data.items():
                 logger.debug("Deserializing element: %s in layer: %s", element_id, layer_name)
                 element_info[element_id] = self._parse_element(element_id, element_data, layer_name)
+
+            logger.debug("Deserialized %i elements for layer %s", len(elements_data), layer_name)
 
         return layer_info, element_info
 

@@ -40,6 +40,8 @@ class BaseCanvasLoader(ABC):
         data = self._prepare_source(source)
         deserialized_info = self.deserialize(data, variables or {})
 
+        logger.debug("Building Canvas from deserialized data with keys: %s", list(deserialized_info.keys()))
+
         settings = deserialized_info.get("settings", {})
         canvas = Canvas.from_dict(settings)
 

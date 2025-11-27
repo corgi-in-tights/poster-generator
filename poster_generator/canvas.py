@@ -102,8 +102,8 @@ class Canvas:
         # Add to groups (sets)
         for group in groups:
             if group not in self.groups:
-                self.groups[group] = set()
-            self.groups[group].add(identifier)
+                self.groups[group] = []
+            self.groups[group].append(identifier)
 
         element.bind_canvas(self, identifier)
 
@@ -129,11 +129,13 @@ class Canvas:
 
             # Remove from all layers (lists, safe removal)
             for layer_info in self.layers.values():
-                layer_info["elements"].remove(identifier)
+                if identifier in layer_info["elements"]:
+                    layer_info["elements"].remove(identifier)
 
-            # Remove from all groups (sets)
+            # Remove from all groups
             for element_ids in self.groups.values():
-                element_ids.discard(identifier)  # safe, no error
+                if identifier in element_ids:
+                    element_ids.remove(identifier)  # safe, no error
 
     def clear_layer(self, layer):
         """
@@ -159,7 +161,7 @@ class Canvas:
             self.remove_elements(identifiers)
             del self.groups[group]
 
-    def get_first_element(self, *, identifier=None, groups=None, layers=None):
+    def get_first_element(self, identifier=None, groups=None, layers=None):
         elements = self.get_elements(
             identifiers=[identifier] if identifier is not None else None,
             groups=groups,
@@ -168,13 +170,20 @@ class Canvas:
         )
         return elements[0] if elements else None
 
+    def _norm_set(self, value):
+        if value is None:
+            return set()
+        if isinstance(value, str):
+            return {value}
+        return set(value)
+
     def get_elements(
         self,
         *,
         identifiers=None,
         groups=None,
         layers=None,
-        require_all=False,
+        require_all=True,
     ):
         """
         Query and retrieve elements by identifiers, groups, or layers.
@@ -193,6 +202,13 @@ class Canvas:
         Returns:
             List of DrawableElement instances matching the query criteria.
         """
+        logger.debug(
+            "Querying elements with identifiers=%s, groups=%s, layers=%s, require_all=%s",
+            identifiers,
+            groups,
+            layers,
+            require_all,
+        )
 
         id_filter = self._norm_set(identifiers)
         group_filter = self._norm_set(groups)
@@ -203,7 +219,7 @@ class Canvas:
 
         group_hits = set()
         for g in group_filter:
-            group_hits |= self.groups.get(g, set())
+            group_hits |= set(self.groups.get(g, []))
 
         layer_hits = set()
         for lf in layer_filter:
@@ -220,15 +236,9 @@ class Canvas:
             if (require_all and all(matches)) or (not require_all and any(matches)):
                 results.append(elem)
 
-        return results
+        logger.debug("Found %d matching elements", len(results))
 
-    # helpers
-    def _norm_set(self, value):
-        if value is None:
-            return set()
-        if isinstance(value, str):
-            return {value}
-        return set(value)
+        return results
 
     def crop(self, x1: float, y1: float, x2: float, y2: float):
         """

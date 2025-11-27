@@ -247,7 +247,7 @@ def test_get_elements_by_identifier():
     canvas.add_element("elem1", elem1)
     canvas.add_element("elem2", elem2)
 
-    results = canvas.get_elements(identifiers="elem1")
+    results = canvas.get_elements(identifiers=["elem1"])
 
     assert results == [elem1]
 
@@ -263,7 +263,7 @@ def test_get_elements_by_multiple_identifiers():
 
     results = canvas.get_elements(identifiers=["elem1", "elem3"])
 
-    assert set(results) == {elem1, elem3}
+    assert results == [elem1, elem3]
 
 
 def test_get_elements_by_group():

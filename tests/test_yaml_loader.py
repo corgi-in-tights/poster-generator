@@ -13,7 +13,7 @@ def loader():
 def basic_yaml_data():
     return {
         "schema": "1.0",
-        "settings": {"width": 400, "height": 300, "background_color": "#000"},
+        "settings": {"width": 400, "height": 300, "background": "#000"},
         "anchors": {"center": {"x": 200, "y": 150}},
         "layers": {
             "background": {
@@ -73,7 +73,7 @@ def test_relative_position_anchor(loader):
                         "type": "text",
                         "rel_position": {
                             "source": "anchor",
-                            "id": "center",
+                            "value": "center",
                             "offset": {"x": 10, "y": -5},
                         },
                         "values": {},
@@ -84,9 +84,8 @@ def test_relative_position_anchor(loader):
         },
     }
 
-    out = loader.deserialize(data, variables={})
-    elem = out["layers"]["main"]["elements"]["title"]
-    assert elem["position"] == (110, 95)
+    canvas = loader.build_canvas(data, variables={})
+    assert canvas.get_first_element("title").position == (110, 95)
 
 
 def test_relative_position_element(loader):
@@ -105,7 +104,7 @@ def test_relative_position_element(loader):
                         "type": "text",
                         "rel_position": {
                             "source": "element",
-                            "id": "first",
+                            "value": "first",
                             "offset": {"x": 20, "y": 5},
                         },
                         "values": {},
@@ -116,9 +115,8 @@ def test_relative_position_element(loader):
         },
     }
 
-    out = loader.deserialize(data, variables={})
-    elem = out["layers"]["main"]["elements"]["second"]
-    assert elem["position"] == (70, 55)
+    canvas = loader.build_canvas(data, variables={})
+    assert canvas.get_first_element("second").position == (70, 55)
 
 
 def test_bad_schema(loader):
