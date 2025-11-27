@@ -1,29 +1,19 @@
 """YAML-based canvas configuration loader."""
 
 import logging
-from pathlib import Path
-
-import yaml
+from abc import ABC
 
 from poster_generator.canvas import Canvas
 from poster_generator.loaders.base import BaseCanvasLoader
 from poster_generator.utils import get_alignment_position
 
-from .resolver import PointResolver, YamlResolver
+from .resolver import LayerBasedResolver, PointResolver
 
 logger = logging.getLogger(__name__)
 
 
-class YamlLoader(BaseCanvasLoader):
-    """
-    Canvas loader for YAML configuration files.
-    """
-
+class LayerBasedLoader(BaseCanvasLoader, ABC):
     SCHEMA_VERSION = "1.0"
-
-    def read_source(self, path: str) -> dict:
-        with Path(path).open() as f:
-            return yaml.safe_load(f)
 
     def deserialize(self, data: dict, variables: dict) -> Canvas:
         """
@@ -39,17 +29,18 @@ class YamlLoader(BaseCanvasLoader):
         Raises:
             ValueError: If the schema version is unsupported.
         """
-        schema = data.get("schema", YamlLoader.SCHEMA_VERSION)
-        if schema != YamlLoader.SCHEMA_VERSION:
-            msg = f"Unsupported schema version: {schema}. Current version is {YamlLoader.SCHEMA_VERSION}."
+        schema = data.get("schema", LayerBasedLoader.SCHEMA_VERSION)
+        if schema != LayerBasedLoader.SCHEMA_VERSION:
+            msg = f"Unsupported schema version: {schema}. Current version is {LayerBasedLoader.SCHEMA_VERSION}."
             raise ValueError(msg)
 
         logger.debug("Deserializing YAML canvas configuration.")
 
         deserialized_info = {}
 
-        self.yaml_resolver = YamlResolver(variables)
-        self.resolve = self.yaml_resolver.resolve_variable  # shortcut
+        resolver = LayerBasedResolver(variables)
+        self.resolve = resolver.resolve_variable  # shortcut
+        self.deep_resolve = resolver.deep_resolve_variables  # shortcut
 
         deserialized_info["settings"] = self._deserialize_settings(data)
         logger.debug("Canvas settings: %s", deserialized_info["settings"])
@@ -65,7 +56,7 @@ class YamlLoader(BaseCanvasLoader):
             len(deserialized_info["elements"]),
         )
 
-        self.yaml_resolver = None
+        self.layer_based_resolver = None
         self.resolve = None
 
         return deserialized_info
@@ -149,12 +140,12 @@ class YamlLoader(BaseCanvasLoader):
 
         values = {}
         for k, v in element_data.get("values", {}).items():
-            values[k] = self.yaml_resolver.deep_resolve_variables(v, key=k)
+            values[k] = self.deep_resolve(v, key=k)
         element_info["values"] = values
 
         operations = {}
         for ko, vo in element_data.get("operations", {}).items():
-            operations[ko] = self.yaml_resolver.deep_resolve_variables(vo)
+            operations[ko] = self.deep_resolve(vo)
         element_info["operations"] = operations
 
         # Support late relative positions
@@ -175,7 +166,7 @@ class YamlLoader(BaseCanvasLoader):
             msg = f"For element {element_id}, 'source' must be specified for relative positioning."
             raise ValueError(msg)
 
-        source_value = self.yaml_resolver.deep_resolve_variables(rel_position_data.get("value"))
+        source_value = self.deep_resolve(rel_position_data.get("value"))
         if source_value is None:
             msg = f"For element {element_id}, 'value' must be specified for relative positioning."
             raise ValueError(msg)

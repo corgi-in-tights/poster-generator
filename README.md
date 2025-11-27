@@ -1,6 +1,6 @@
 # Poster Generator
 
-A *lightweight* flexible Python library for building and rendering graphics with support for layers, groups, and YAML-based templates.
+A flexible Python library for building and rendering posters/infomatics with support for layers, groups, and YAML-based templates.
 
 [![Python Version](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)

@@ -2,6 +2,8 @@ import re
 
 
 class PointResolver:
+    POINT_DIMENSIONS = 2
+
     def should_resolve(self, field_name):
         return field_name in ("anchor", "position", "offset")
 
@@ -46,7 +48,7 @@ class PointResolver:
     def resolve(self, field_name, field_value, default_x=0, default_y=0):
         if isinstance(field_value, str):
             parts = field_value.split(",")
-            if len(parts) != YamlResolver.POINT_DIMENSIONS:
+            if len(parts) != PointResolver.POINT_DIMENSIONS:
                 msg = f"Point string must be in 'x,y' format: {field_value}"
                 raise ValueError(msg)
             x = self.resolve_position_value(parts[0].strip(), default_x)
@@ -54,7 +56,7 @@ class PointResolver:
 
         # Handle list format: [x, y]
         elif isinstance(field_value, list):
-            if len(field_value) != YamlResolver.POINT_DIMENSIONS:
+            if len(field_value) != PointResolver.POINT_DIMENSIONS:
                 msg = f"Point list must contain exactly 2 elements: {field_value}"
                 raise ValueError(msg)
             x = self.resolve_position_value(field_value[0], default_x)
@@ -91,9 +93,8 @@ class ColorResolver:
         return field_value
 
 
-class YamlResolver:
+class LayerBasedResolver:
     VARIABLE_PATTERN = r"--\$\{([^}]+)\}--"
-    POINT_DIMENSIONS = 2
 
     def __init__(self, variables, additional_resolvers=None):
         self.variables = variables
@@ -123,7 +124,7 @@ class YamlResolver:
             msg = f"Undefined variable: {var_name}"
             raise ValueError(msg)
 
-        s = re.sub(YamlResolver.VARIABLE_PATTERN, replace_var, value)
+        s = re.sub(LayerBasedResolver.VARIABLE_PATTERN, replace_var, value)
         return self.attempt_additional_resolution(key, s)
 
     def deep_resolve_variables(self, data, key=None):
