@@ -1,6 +1,77 @@
 import re
 
 
+class PointResolver:
+    def should_resolve(self, field_name):
+        return field_name in ("anchor", "position", "offset")
+
+    def resolve_alphabetic_position(self, value):
+        value_lower = value.strip().lower()
+        if value_lower in ("left", "top"):
+            return 0.0
+        if value_lower in ("center", "middle"):
+            return 0.5
+        if value_lower in ("right", "bottom"):
+            return 1.0
+        return None
+
+    def resolve_position_value(self, value, default=0):
+        if value is None:
+            return default
+
+        # Handle string values
+        if isinstance(value, str):
+            value_lower = value.strip().lower()
+
+            n = self.resolve_alphabetic_position(value_lower)
+            if n is not None:
+                return n
+
+            # Handle percentages
+            if value_lower.endswith("%"):
+                try:
+                    percentage = float(value_lower[:-1])
+                    return percentage / 100.0
+                except ValueError as err:
+                    msg = f"Invalid percentage value: {value}"
+                    raise ValueError(msg) from err
+
+        # Handle numeric values
+        try:
+            return float(value)
+        except (ValueError, TypeError) as err:
+            msg = f"Invalid position value: {value}"
+            raise ValueError(msg) from err
+
+    def resolve(self, field_name, field_value, default_x=0, default_y=0):
+        if isinstance(field_value, str):
+            parts = field_value.split(",")
+            if len(parts) != YamlResolver.POINT_DIMENSIONS:
+                msg = f"Point string must be in 'x,y' format: {field_value}"
+                raise ValueError(msg)
+            x = self.resolve_position_value(parts[0].strip(), default_x)
+            y = self.resolve_position_value(parts[1].strip(), default_y)
+
+        # Handle list format: [x, y]
+        elif isinstance(field_value, list):
+            if len(field_value) != YamlResolver.POINT_DIMENSIONS:
+                msg = f"Point list must contain exactly 2 elements: {field_value}"
+                raise ValueError(msg)
+            x = self.resolve_position_value(field_value[0], default_x)
+            y = self.resolve_position_value(field_value[1], default_y)
+
+        # Handle dict format: {x: ..., y: ...}
+        elif isinstance(field_value, dict):
+            x = self.resolve_position_value(field_value.get("x"), default_x)
+            y = self.resolve_position_value(field_value.get("y"), default_y)
+
+        else:
+            msg = f"Invalid point data type: {type(field_value)}"
+            raise TypeError(msg)
+
+        return (x, y)
+
+
 class ColorResolver:
     def should_resolve(self, field_name):
         return field_name in ("background", "fill", "outline", "color")
@@ -19,13 +90,17 @@ class ColorResolver:
                 raise ValueError(msg) from err
         return field_value
 
+
 class YamlResolver:
     VARIABLE_PATTERN = r"--\$\{([^}]+)\}--"
     POINT_DIMENSIONS = 2
 
     def __init__(self, variables, additional_resolvers=None):
         self.variables = variables
-        self.additional_resolvers = additional_resolvers or [ColorResolver()]
+        self.additional_resolvers = additional_resolvers or [
+            ColorResolver(),
+            PointResolver(),
+        ]
 
     def attempt_additional_resolution(self, field_name, field_value):
         if field_name is None:
@@ -72,75 +147,3 @@ class YamlResolver:
             return [self.deep_resolve_variables(item, key=None) for item in data]
 
         return data
-
-    def _resolve_alphabetic_position(self, value):
-        value_lower = value.strip().lower()
-        if value_lower in ("left", "top"):
-            return 0.0
-        if value_lower in ("center", "middle"):
-            return 0.5
-        if value_lower in ("right", "bottom"):
-            return 1.0
-        return None
-
-    def resolve_position_value(self, value, default=0):
-        if value is None:
-            return default
-
-        # Resolve variables first
-        value = self.resolve_variable(value)
-
-        # Handle string values
-        if isinstance(value, str):
-            value_lower = value.strip().lower()
-
-            n = self._resolve_alphabetic_position(value_lower)
-            if n is not None:
-                return n
-
-            # Handle percentages
-            if value_lower.endswith("%"):
-                try:
-                    percentage = float(value_lower[:-1])
-                    return percentage / 100.0
-                except ValueError as err:
-                    msg = f"Invalid percentage value: {value}"
-                    raise ValueError(msg) from err
-
-        # Handle numeric values
-        try:
-            return float(value)
-        except (ValueError, TypeError) as err:
-            msg = f"Invalid position value: {value}"
-            raise ValueError(msg) from err
-
-
-    def resolve_point(self, point_data, default_x=0, default_y=0):
-        # Handle string format: "x,y"
-        if isinstance(point_data, str):
-            parts = point_data.split(",")
-            if len(parts) != YamlResolver.POINT_DIMENSIONS:
-                msg = f"Point string must be in 'x,y' format: {point_data}"
-                raise ValueError(msg)
-            x = self.resolve_position_value(parts[0].strip(), default_x)
-            y = self.resolve_position_value(parts[1].strip(), default_y)
-
-        # Handle list format: [x, y]
-        elif isinstance(point_data, list):
-            if len(point_data) != YamlResolver.POINT_DIMENSIONS:
-                msg = f"Point list must contain exactly 2 elements: {point_data}"
-                raise ValueError(msg)
-            x = self.resolve_position_value(point_data[0], default_x)
-            y = self.resolve_position_value(point_data[1], default_y)
-
-        # Handle dict format: {x: ..., y: ...}
-        elif isinstance(point_data, dict):
-            x = self.resolve_position_value(point_data.get("x"), default_x)
-            y = self.resolve_position_value(point_data.get("y"), default_y)
-
-        else:
-            msg = f"Invalid point data type: {type(point_data)}"
-            raise TypeError(msg)
-
-        return (x, y)
-

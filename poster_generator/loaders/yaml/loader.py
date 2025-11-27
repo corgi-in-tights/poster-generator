@@ -9,7 +9,7 @@ from poster_generator.canvas import Canvas
 from poster_generator.loaders.base import BaseCanvasLoader
 from poster_generator.utils import get_alignment_position
 
-from .resolver import YamlResolver
+from .resolver import PointResolver, YamlResolver
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class YamlLoader(BaseCanvasLoader):
         deserialized_info = {}
 
         self.yaml_resolver = YamlResolver(variables)
-        self.resolve_variable = self.yaml_resolver.resolve_variable  # shortcut
+        self.resolve = self.yaml_resolver.resolve_variable  # shortcut
 
         deserialized_info["settings"] = self._deserialize_settings(data)
         logger.debug("Canvas settings: %s", deserialized_info["settings"])
@@ -66,21 +66,21 @@ class YamlLoader(BaseCanvasLoader):
         )
 
         self.yaml_resolver = None
-        self.resolve_variable = None
+        self.resolve = None
 
         return deserialized_info
 
     def _deserialize_settings(self, data: dict):
         settings_data = data.get("settings", {})
-        width = int(self.resolve_variable(settings_data.get("width", 1080)))
-        height = int(self.resolve_variable(settings_data.get("height", 1350)))
-        background = self.resolve_variable(settings_data.get("background", "#fff"), key="background")
+        width = int(self.resolve(settings_data.get("width", 1080)))
+        height = int(self.resolve(settings_data.get("height", 1350)))
+        background = self.resolve(settings_data.get("background", "#fff"), key="background")
         return {"width": width, "height": height, "background": background}
 
     def _deserialize_anchors(self, data: dict):
         anchors = {}
         for anchor_id, anchor_data in data.get("anchors", {}).items():
-            anchors[anchor_id] = self.yaml_resolver.resolve_point(anchor_data)
+            anchors[anchor_id] = self.resolve(anchor_data, key="anchor")
         return anchors
 
     def _deserialize_layers_elements(self, data: dict):
@@ -113,7 +113,7 @@ class YamlLoader(BaseCanvasLoader):
         """
         opacity = max(
             0.0,
-            min(1.0, float(self.resolve_variable(layer_settings.get("opacity", 1)))),
+            min(1.0, float(self.resolve(layer_settings.get("opacity", 1)))),
         )
         return {
             "opacity": opacity,
@@ -159,7 +159,7 @@ class YamlLoader(BaseCanvasLoader):
 
         # Support late relative positions
         if "position" in element_data:
-            element_info["position"] = self.yaml_resolver.resolve_point(element_data["position"])
+            element_info["position"] = self.resolve(element_data["position"], key="position")
         elif "rel_position" in element_data:
             rel_position_data = element_data["rel_position"]
             element_info["rel_position"] = self._parse_element_relative_position(element_id, rel_position_data)
@@ -170,7 +170,7 @@ class YamlLoader(BaseCanvasLoader):
         return element_info
 
     def _parse_element_relative_position(self, element_id: str, rel_position_data: dict):
-        source = self.resolve_variable(rel_position_data.get("source"))
+        source = self.resolve(rel_position_data.get("source"))
         if source is None:
             msg = f"For element {element_id}, 'source' must be specified for relative positioning."
             raise ValueError(msg)
@@ -181,12 +181,12 @@ class YamlLoader(BaseCanvasLoader):
             raise ValueError(msg)
 
         if "offset" in rel_position_data:
-            offset = self.yaml_resolver.resolve_point(rel_position_data.get("offset"), default_x=0, default_y=0)
+            offset = self.resolve(rel_position_data.get("offset"), key="offset")
         else:
             offset = (0, 0)
 
         # For specific parent element alignment
-        parent = self.resolve_variable(rel_position_data.get("parent"))
+        parent = self.resolve(rel_position_data.get("parent"))
 
         return {
             "source": source,
@@ -216,11 +216,11 @@ class YamlLoader(BaseCanvasLoader):
         offset = rel_position_info.get("offset", (0, 0))
 
         if source == "anchor":
-            position = self._resolve_anchor_position(element_id, value, anchors)
+            position = self._calculate_anchor_position(element_id, value, anchors)
         elif source == "element":
-            position = self._resolve_element_reference_position(element_id, value, canvas)
+            position = self._calculate_element_reference_position(element_id, value, canvas)
         elif source == "alignment":
-            position = self._resolve_alignment_position(element, value, rel_position_info, canvas)
+            position = self._calculate_alignment_position(element, value, rel_position_info, canvas)
         else:
             msg = f"For element {element_id}, unsupported relative position source '{source}'."
             raise ValueError(msg)
@@ -228,7 +228,7 @@ class YamlLoader(BaseCanvasLoader):
         logger.debug("Calculated position for element %s: %s", element_id, position)
         return (position[0] + offset[0], position[1] + offset[1])
 
-    def _resolve_anchor_position(self, element_id: str, anchor_name: str, anchors: dict):
+    def _calculate_anchor_position(self, element_id: str, anchor_name: str, anchors: dict):
         """Resolve position from an anchor."""
         if not isinstance(anchor_name, str):
             msg = f"For element '{element_id}', anchor name must be a string."
@@ -241,7 +241,7 @@ class YamlLoader(BaseCanvasLoader):
 
         return anchor_position
 
-    def _resolve_element_reference_position(self, element_id: str, ref_element_id: str, canvas: Canvas):
+    def _calculate_element_reference_position(self, element_id: str, ref_element_id: str, canvas: Canvas):
         """Resolve position from another element."""
         if not isinstance(ref_element_id, str):
             msg = f"For element '{element_id}', reference element ID must be a string."
@@ -254,13 +254,11 @@ class YamlLoader(BaseCanvasLoader):
 
         return ref_element.position
 
-    def _resolve_alignment_position(self, element, value, rel_position_info: dict, canvas: Canvas):
+    def _calculate_alignment_position(self, element, value, rel_position_info: dict, canvas: Canvas):
         """Resolve position from alignment configuration."""
-        # Use a private resolver
-        yaml_resolver = YamlResolver({})  # No variables needed here
         logger.debug("Resolving alignment position with value: %s", value)
 
-        x_align, y_align = yaml_resolver.resolve_point(value, default_x=None, default_y=None)
+        x_align, y_align = PointResolver().resolve("alignment", value, default_x=None, default_y=None)
 
         parent_element_id = rel_position_info.get("parent")
         parent_element = canvas.get_first_element(identifier=parent_element_id) if parent_element_id else None
