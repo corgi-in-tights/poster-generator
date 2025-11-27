@@ -1,8 +1,7 @@
 import logging
 import os
 
-from PIL import Image
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
 
 def setup_debug_logging():

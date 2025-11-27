@@ -1,8 +1,7 @@
 """Base abstract loader for creating canvases from various data sources."""
 
 import logging
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from poster_generator.canvas import Canvas
 from poster_generator.factories.element import get_element_factory

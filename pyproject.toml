@@ -55,6 +55,3 @@ ignore = [
   "UP038"     # isinstance tuple perf issue
 ]
 extend-unsafe-fixes = ["UP038"]
-
-[tool.ruff.lint.isort]
-force-single-line = true

@@ -1,10 +1,6 @@
 from typing import Any
 
-from poster_generator.elements import EllipseElement
-from poster_generator.elements import DrawableElement
-from poster_generator.elements import ImageElement
-from poster_generator.elements import RectangleElement
-from poster_generator.elements import TextElement
+from poster_generator.elements import DrawableElement, EllipseElement, ImageElement, RectangleElement, TextElement
 
 
 class ElementFactory:

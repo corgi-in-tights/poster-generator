@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
-from PIL import Image
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
 MAX_ALPHA = 255
 ALPHA_INDEX = 3

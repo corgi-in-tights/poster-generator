@@ -1,7 +1,6 @@
 """Factory for registering and applying image operations."""
 
-from poster_generator.operations.image import apply_hue_shift
-from poster_generator.operations.image import set_hue_from_hex
+from poster_generator.operations.image import apply_hue_shift, set_hue_from_hex
 from poster_generator.operations.text import randomize_text_color
 
 

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import copy
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from PIL import Image
-    from PIL import ImageDraw
+    from PIL import Image, ImageDraw
 
     from poster_generator.canvas import Canvas
 
