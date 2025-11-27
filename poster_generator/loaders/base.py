@@ -5,8 +5,8 @@ from abc import ABC
 from abc import abstractmethod
 
 from poster_generator.canvas import Canvas
-from poster_generator.elements.factory import get_factory
-from poster_generator.operations.factory import get_operation_factory
+from poster_generator.factories.element import get_element_factory
+from poster_generator.factories.operation import get_operation_factory
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,9 @@ class BaseCanvasLoader(ABC):
 
     Subclasses may optionally override:
         - preprocess(): Transform raw data before deserialization
+        - pre_build_element(): Modify element info before building
+        - post_build_element(): Process element after building, before adding to canvas
+        - post_build_canvas(): Final processing after canvas is fully built
     """
 
     def build_canvas(self, source, variables=None):
@@ -51,12 +54,21 @@ class BaseCanvasLoader(ABC):
 
         elements = deserialized_info.get("elements", {})
         for element_id, element_info in elements.items():
+            element_info = self.pre_build_element(element_id, element_info, canvas, deserialized_info)  # noqa: PLW2901
+            if element_info is None:
+                logger.debug("Element %s skipped by pre_build_element hook.", element_id)
+                continue
+
             layer = element_info.get("layer")
             groups = element_info.get("groups", [])
 
             element = self.build_element(element_id, element_info)
             self.post_build_element(element_id, element, canvas, element_info, deserialized_info)
             canvas.add_element(element_id, element, layer=layer, groups=groups)
+
+        self.post_build_canvas(canvas, deserialized_info)
+
+        logger.info("Canvas built with %d layers and %d elements.", len(canvas.layers), len(canvas.elements))
 
         return canvas
 
@@ -109,6 +121,23 @@ class BaseCanvasLoader(ABC):
             - elements: dict of element definitions
         """
 
+    def pre_build_element(
+        self, element_id: str, element_info: dict, canvas: Canvas, deserialized_info: dict,
+    ) -> dict | None:
+        """
+        Hook for pre-processing element info before building the element.
+
+        Args:
+            element_id: The identifier of the element.
+            element_info: The raw element data from the deserialized configuration.
+            canvas: The Canvas instance being built.
+            deserialized_info: The full deserialized canvas data.
+
+        Returns:
+            dict: Modified element_info to use for building, or None to skip this element.
+        """
+        return element_info
+
     def build_element(self, element_id: str, element_info: dict):
         """
         Convert YAML dict into an Element instance.
@@ -122,7 +151,7 @@ class BaseCanvasLoader(ABC):
         """
         element_type = element_info.get("type")
 
-        element = get_factory().create_element(
+        element = get_element_factory().create_element(
             element_type,
             position=element_info.get("position"),
             values=element_info.get("values", {}),
@@ -155,12 +184,25 @@ class BaseCanvasLoader(ABC):
         self, element_id: str, element, canvas: Canvas, element_info: dict, deserialized_info: dict,
     ):
         """
-        Hook for pre-processing an element before it is added to the canvas.
+        Hook for post-processing an element before it is added to the canvas.
 
         Args:
             element_id: The identifier of the element.
-            element: The element instance that was added.
-            canvas: The Canvas instance the element was added to.
+            element: The element instance that was built.
+            canvas: The Canvas instance the element will be added to.
             element_info: The raw element data from the deserialized configuration.
+            deserialized_info: The full deserialized canvas data.
+        """
+
+    def post_build_canvas(  # noqa: B027
+        self, canvas: Canvas, deserialized_info: dict,
+    ):
+        """
+        Hook for final processing after the canvas is fully built.
+
+        Useful for validation, linking elements together, or applying global transformations.
+
+        Args:
+            canvas: The fully built Canvas instance.
             deserialized_info: The full deserialized canvas data.
         """

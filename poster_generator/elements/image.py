@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from .drawable import DrawableElement
+from .abstract.drawable import DrawableElement
 
 
 class ImageElement(DrawableElement):
@@ -43,7 +43,7 @@ class ImageElement(DrawableElement):
         self.image = None
 
         if image_path is not None:
-            self.load_image(image_path)
+            self.set_image_path(image_path)
 
 
     def resize_image(self, new_width, new_height):

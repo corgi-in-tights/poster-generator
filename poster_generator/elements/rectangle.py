@@ -1,15 +1,10 @@
 """Rectangle element implementation for rendering filled rectangles on canvas."""
 
-from typing import TYPE_CHECKING
 
-from .drawable import DrawableElement
-
-if TYPE_CHECKING:
-    from PIL import Image
-    from PIL import ImageDraw
+from .abstract import ShapeElement
 
 
-class RectangleElement(DrawableElement):
+class RectangleElement(ShapeElement):
     """A drawable rectangle element with support for rounded corners and styling.
 
     The rectangle is positioned by its top-left corner and can have rounded corners
@@ -44,72 +39,35 @@ class RectangleElement(DrawableElement):
 
     def __init__(
         self,
-        position=(0, 0),
-        width=None,
-        height=None,
-        fill="#000000",
-        outline=None,
-        outline_width=1,
-        radius=0,
+        border_radius=0,
         other_position=None,
+        **kwargs,
     ):
-        """Initialize a RectangleElement with specified dimensions and styling.
-
-        Args:
-            position (tuple): The (x, y) coordinates for the top-left corner of the rectangle.
-            width (int, optional): Width of the rectangle in pixels. Defaults to 100.
-            height (int, optional): Height of the rectangle in pixels. Defaults to 100.
-            fill (str, optional): Fill color as hex string. Defaults to "#000000".
-            outline (str, optional): Outline color as hex string. Defaults to None (no outline).
-            outline_width (int, optional): Width of the outline in pixels. Defaults to 1.
-            radius (int, optional): Corner radius for rounded corners in pixels. Defaults to 0 (sharp corners).
-            other_position (tuple, optional): Calculates width and height based on this position if provided.
-        """
-        super().__init__(position)
+        super().__init__(**kwargs)
         if other_position is not None:
-            width = abs(other_position[0] - position[0])
-            height = abs(other_position[1] - position[1])
-        self.width = width
-        self.height = height
+            self.width = abs(other_position[0] - self.position[0])
+            self.height = abs(other_position[1] - self.position[1])
+        self.border_radius = border_radius
 
-        self.fill = fill
-        self.outline = outline
-        self.outline_width = outline_width
-        self.radius = radius
-
-    def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict | None = None) -> None:
-        """
-        Draw the rectangle onto the canvas.
-
-        Args:
-            image_draw: PIL ImageDraw instance for drawing operations.
-            image: PIL Image instance representing the canvas (not used for rectangles).
-            blend_settings: Dictionary containing blend settings (opacity, etc.).
-
-        Raises:
-            ValueError: If position is not set.
-        """
-        if self.position is None:
-            msg = "Position must be specified as (x, y)."
-            raise ValueError(msg)
-
+    def draw_composite(self, image_draw, image, **kwargs):
         x, y = self.position
-        x2 = x + self.width
-        y2 = y + self.height
+        x2, y2 = x + self.width, y + self.height
 
-        # Draw rounded rectangle if radius is specified
-        if self.radius > 0:
+        fill = kwargs.get("fill", self.fill)
+        outline = kwargs.get("outline", self.outline)
+        outline_width = kwargs.get("outline_width", self.outline_width)
+
+        if self.border_radius > 0:
             image_draw.rounded_rectangle(
                 [(x, y), (x2, y2)],
-                radius=self.radius,
-                fill=self.fill,
-                outline=self.outline,
-                width=self.outline_width,
+                radius=self.border_radius,
+                fill=fill,
+                outline=outline,
+                width=outline_width,
             )
-        else:
-            # Draw regular rectangle
+        else:  # Draw regular rectangle
             image_draw.rectangle(
-                [(x, y), (x2, y2)], fill=self.fill, outline=self.outline, width=self.outline_width
+                [(x, y), (x2, y2)], fill=fill, outline=outline, width=outline_width,
             )
 
     def is_ready(self) -> bool:
@@ -121,33 +79,4 @@ class RectangleElement(DrawableElement):
         """
         return self.position is not None and self.width is not None and self.height is not None
 
-    def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
-        """
-        Check if this rectangle overlaps with a rectangular region.
 
-        Args:
-            x1: Left edge of the query region.
-            y1: Top edge of the query region.
-            x2: Right edge of the query region.
-            y2: Bottom edge of the query region.
-
-        Returns:
-            bool: True if the rectangle overlaps with the specified region.
-        """
-        if self.position is None:
-            return False
-
-        rect_x1, rect_y1 = self.position
-        rect_x2 = rect_x1 + self.width
-        rect_y2 = rect_y1 + self.height
-
-        # Check if rectangles overlap
-        return not (
-            rect_x2 < x1  # Rectangle is to the left of region
-            or rect_x1 > x2  # Rectangle is to the right of region
-            or rect_y2 < y1  # Rectangle is above region
-            or rect_y1 > y2  # Rectangle is below region
-        )
-
-    def get_size(self):
-        return self.width, self.height

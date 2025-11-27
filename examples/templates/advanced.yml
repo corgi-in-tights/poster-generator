@@ -2,13 +2,8 @@ schema: "1.0"
 
 settings:
   width: 1080
-  height: 1080
+  height: 1350
   background_color: "#000000"
-
-anchors:
-  overlay_start:
-    x: 270
-    y: 270
 
 layers:
   background:
@@ -18,20 +13,28 @@ layers:
         values:
           image_path: --${background_image}--
           width: 1080
-          height: 1080
+          height: 1350
 
   overlay_panel:
     elements:
       main_panel:
         type: rectangle
         rel_position:
-          source: anchor
-          value: overlay_start
+          source: alignment
+          value:
+            x: center
+            y: center
         values:
-          width: 540
-          height: 540
-          fill: "#3d9be3"
-          radius: 10
+          fill: 
+            red: 120
+            blue: 200
+            green: 120
+            alpha: 20
+          width: 650
+          height: 750
+          outline: [255, 255, 255, 110]
+          outline_width: 2
+          border_radius: 10
 
       tagline_text:
         type: text

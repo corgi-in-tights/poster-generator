@@ -9,7 +9,7 @@ from poster_generator.elements import CircleElement
 from poster_generator.elements import ImageElement
 from poster_generator.elements import RectangleElement
 from poster_generator.elements import TextElement
-from poster_generator.elements.factory import ElementFactory
+from poster_generator.factories.element import ElementFactory
 
 # ==================== TextElement Tests ====================
 

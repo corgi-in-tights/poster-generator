@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from PIL import ImageFont
 
-from .drawable import DrawableElement
+from .abstract.drawable import DrawableElement
 
 if TYPE_CHECKING:
     from PIL import ImageDraw
@@ -52,7 +52,7 @@ class TextElement(DrawableElement):
 
     font_cache = {}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         position=(0, 0),
         text="",

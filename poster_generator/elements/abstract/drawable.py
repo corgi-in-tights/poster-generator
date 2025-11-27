@@ -5,8 +5,6 @@ from abc import ABC
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from poster_generator import snapping
-
 if TYPE_CHECKING:
     from PIL import Image
     from PIL import ImageDraw
@@ -53,15 +51,15 @@ class DrawableElement(ABC):
 
     @abstractmethod
     def draw(self, image_draw: ImageDraw.Draw, image: Image.Image, blend_settings: dict | None = None) -> None:
-        pass
+        ...
 
     @abstractmethod
     def is_ready(self) -> bool:
-        pass
+        ...
 
     @abstractmethod
     def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
-        pass
+        ...
 
     def overlaps_at(self, x: float, y: float) -> bool:
         """
@@ -156,24 +154,19 @@ class DrawableElement(ABC):
             parent_width, parent_height = parent_element.get_size()
             parent_x, parent_y = parent_element.position
 
-        return snapping.get_alignment_position(
-            snapping.ParentBounds(
-                width=parent_width,
-                height=parent_height,
-                x=parent_x,
-                y=parent_y,
-            ),
-            snapping.ElementSize(
-                width=width,
-                height=height,
-                default_x=self.position[0],
-                default_y=self.position[1],
-            ),
-            snapping.AlignmentOptions(
-                x_align=x_align,
-                y_align=y_align,
-            ),
+        default_x = self.position[0]
+        default_y = self.position[1]
+
+        new_x = (
+            default_x if x_align is None
+            else x_align * (parent_width - width) + parent_x
         )
+        new_y = (
+            default_y if y_align is None
+            else y_align * (parent_height - height) + parent_y
+        )
+
+        return (new_x, new_y)
 
 
     def copy(self):

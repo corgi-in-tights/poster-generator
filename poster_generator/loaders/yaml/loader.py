@@ -73,7 +73,7 @@ class YamlLoader(BaseCanvasLoader):
         settings_data = data.get("settings", {})
         width = int(self.resolve_variable(settings_data.get("width", 1080)))
         height = int(self.resolve_variable(settings_data.get("height", 1350)))
-        background = self.resolve_variable(settings_data.get("background", "#fff"))
+        background = self.resolve_variable(settings_data.get("background", "#fff"), key="background")
         return {"width": width, "height": height, "background": background}
 
     def _deserialize_anchors(self, data: dict):
@@ -110,7 +110,10 @@ class YamlLoader(BaseCanvasLoader):
                 "opacity": float (0.0 to 1.0),
             }
         """
-        opacity = max(0.0, min(1.0, float(self.resolve_variable(layer_settings.get("opacity", 1)))))
+        opacity = max(
+            0.0,
+            min(1.0, float(self.resolve_variable(layer_settings.get("opacity", 1)))),
+        )
         return {
             "opacity": opacity,
         }
@@ -131,7 +134,7 @@ class YamlLoader(BaseCanvasLoader):
                                         "parent": str | None}
                                     }
         """
-        logger.info("Parsing element %s of type %s", element_id, element_data.get("type"))
+        logger.debug("Parsing element %s of type %s", element_id, element_data.get("type"))
         element_info = {}
 
         element_type = element_data.get("type")
@@ -145,7 +148,7 @@ class YamlLoader(BaseCanvasLoader):
 
         values = {}
         for k, v in element_data.get("values", {}).items():
-            values[k] = self.yaml_resolver.deep_resolve_variables(v)
+            values[k] = self.yaml_resolver.deep_resolve_variables(v, key=k)
         element_info["values"] = values
 
         operations = {}

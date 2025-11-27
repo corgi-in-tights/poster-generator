@@ -1,10 +1,10 @@
 from typing import Any
 
-from .circle import CircleElement
-from .drawable import DrawableElement
-from .image import ImageElement
-from .rectangle import RectangleElement
-from .text import TextElement
+from poster_generator.elements import EllipseElement
+from poster_generator.elements import DrawableElement
+from poster_generator.elements import ImageElement
+from poster_generator.elements import RectangleElement
+from poster_generator.elements import TextElement
 
 
 class ElementFactory:
@@ -16,7 +16,7 @@ class ElementFactory:
         self.register("text", TextElement)
         self.register("image", ImageElement)
         self.register("rectangle", RectangleElement)
-        self.register("circle", CircleElement)
+        self.register("ellipse", EllipseElement)
 
     def register(self, element_type: str, element_class: dict[DrawableElement]):
         """
@@ -65,7 +65,7 @@ class ElementFactory:
 _default_factory = ElementFactory()
 
 
-def get_factory() -> ElementFactory:
+def get_element_factory() -> ElementFactory:
     """Get the default factory instance."""
     return _default_factory
 
@@ -78,4 +78,4 @@ def register_element(element_type: str, element_class: type[DrawableElement]):
         element_type: String identifier for the element type (e.g., "text", "image")
         element_class: The class to instantiate for this type
     """
-    get_factory().register(element_type, element_class)
+    get_element_factory().register(element_type, element_class)

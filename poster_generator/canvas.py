@@ -7,9 +7,9 @@ from PIL import ImageDraw
 
 def setup_debug_logging():
     logger = logging.getLogger("poster_generator")
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
     logger.addHandler(handler)
     return logger
 
@@ -54,7 +54,7 @@ class Canvas:
         # Fast ref for groups
         self.groups = {}
 
-        self._image = Image.new("RGB", (self.width, self.height), self.background)
+        self._image = Image.new("RGBA", (self.width, self.height), self.background)
         self._draw = ImageDraw.Draw(self._image)
 
     def add_layer(self, layer_name, settings=None):

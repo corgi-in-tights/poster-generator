@@ -1,14 +1,12 @@
-from .circle import CircleElement
-from .drawable import DrawableElement
-from .factory import get_factory
-from .factory import register_element
+from .abstract.drawable import DrawableElement
+from .ellipse import EllipseElement
 from .image import ImageElement
 from .rectangle import RectangleElement
 from .text import TextElement
 
 __all__ = [
-    "CircleElement",
     "DrawableElement",
+    "EllipseElement",
     "ImageElement",
     "RectangleElement",
     "TextElement",
