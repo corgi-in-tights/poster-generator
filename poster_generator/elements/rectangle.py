@@ -1,19 +1,20 @@
 """Rectangle element implementation for rendering filled rectangles on canvas."""
 
-from PIL import ImageDraw
 from typing import TYPE_CHECKING
+
 from .drawable import DrawableElement
 
 if TYPE_CHECKING:
     from PIL import Image
+    from PIL import ImageDraw
 
 
 class RectangleElement(DrawableElement):
     """A drawable rectangle element with support for rounded corners and styling.
-    
+
     The rectangle is positioned by its top-left corner and can have rounded corners
     specified by a radius parameter. Supports both background and outline colors.
-    
+
     Attributes:
         width (int): Rectangle width in pixels.
         height (int): Rectangle height in pixels.
@@ -21,7 +22,7 @@ class RectangleElement(DrawableElement):
         outline_color (str or None): Outline color as hex string, or None for no outline.
         outline_width (int): Width of the outline in pixels.
         radius (int): Corner radius in pixels for rounded corners (0 for sharp corners).
-    
+
     Example:
         >>> rect = RectangleElement(
         ...     position=(100, 100),
@@ -29,7 +30,7 @@ class RectangleElement(DrawableElement):
         ...     height=200,
         ...     background="#FF5733"
         ... )
-        >>> 
+        >>>
         >>> rounded_rect = RectangleElement(
         ...     position=(100, 100),
         ...     width=300,
@@ -40,7 +41,7 @@ class RectangleElement(DrawableElement):
         ...     radius=20
         ... )
     """
-    
+
     def __init__(
         self,
         position=(0, 0),
@@ -50,10 +51,10 @@ class RectangleElement(DrawableElement):
         outline_color=None,
         outline_width=1,
         radius=0,
-        other_position=None
+        other_position=None,
     ):
         """Initialize a RectangleElement with specified dimensions and styling.
-        
+
         Args:
             position (tuple): The (x, y) coordinates for the top-left corner of the rectangle.
             width (int, optional): Width of the rectangle in pixels. Defaults to 100.
@@ -70,31 +71,32 @@ class RectangleElement(DrawableElement):
             height = abs(other_position[1] - position[1])
         self.width = width
         self.height = height
-        
+
         self.background = background
         self.outline_color = outline_color
         self.outline_width = outline_width
         self.radius = radius
-    
+
     def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict) -> None:
         """
         Draw the rectangle onto the canvas.
-        
+
         Args:
             image_draw: PIL ImageDraw instance for drawing operations.
             image: PIL Image instance representing the canvas (not used for rectangles).
             blend_settings: Dictionary containing blend settings (opacity, etc.).
-        
+
         Raises:
             ValueError: If position is not set.
         """
         if self.position is None:
-            raise ValueError("Position must be specified as (x, y).")
-        
+            msg = "Position must be specified as (x, y)."
+            raise ValueError(msg)
+
         x, y = self.position
         x2 = x + self.width
         y2 = y + self.height
-        
+
         # Draw rounded rectangle if radius is specified
         if self.radius > 0:
             image_draw.rounded_rectangle(
@@ -102,56 +104,49 @@ class RectangleElement(DrawableElement):
                 radius=self.radius,
                 fill=self.background,
                 outline=self.outline_color,
-                width=self.outline_width
+                width=self.outline_width,
             )
         else:
             # Draw regular rectangle
             image_draw.rectangle(
-                [(x, y), (x2, y2)],
-                fill=self.background,
-                outline=self.outline_color,
-                width=self.outline_width
+                [(x, y), (x2, y2)], fill=self.background, outline=self.outline_color, width=self.outline_width
             )
-    
+
     def is_ready(self) -> bool:
         """
         Check if the rectangle element is ready to be drawn.
-        
+
         Returns:
             bool: True if position, width, and height are set.
         """
-        return (
-            self.position is not None
-            and self.width is not None
-            and self.height is not None
-        )
-    
+        return self.position is not None and self.width is not None and self.height is not None
+
     def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
         """
         Check if this rectangle overlaps with a rectangular region.
-        
+
         Args:
             x1: Left edge of the query region.
             y1: Top edge of the query region.
             x2: Right edge of the query region.
             y2: Bottom edge of the query region.
-        
+
         Returns:
             bool: True if the rectangle overlaps with the specified region.
         """
         if self.position is None:
             return False
-        
+
         rect_x1, rect_y1 = self.position
         rect_x2 = rect_x1 + self.width
         rect_y2 = rect_y1 + self.height
-        
+
         # Check if rectangles overlap
         return not (
-            rect_x2 < x1 or  # Rectangle is to the left of region
-            rect_x1 > x2 or  # Rectangle is to the right of region
-            rect_y2 < y1 or  # Rectangle is above region
-            rect_y1 > y2     # Rectangle is below region
+            rect_x2 < x1  # Rectangle is to the left of region
+            or rect_x1 > x2  # Rectangle is to the right of region
+            or rect_y2 < y1  # Rectangle is above region
+            or rect_y1 > y2  # Rectangle is below region
         )
 
     def get_size(self):

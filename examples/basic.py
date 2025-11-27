@@ -23,9 +23,8 @@ text_element = TextElement(
     color="#333333",
 )
 canvas.add_element("title", text_element)
-text_element.align_to(canvas, x_align="center", y_align="center")
+text_element.align_to(x_align="center", y_align="center")
 
 
 image = canvas.render()
 image.show()
-# image.save("basic_poster.png")

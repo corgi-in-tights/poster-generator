@@ -6,9 +6,6 @@ settings:
   background_color: "#000000"
 
 anchors:
-  center:
-    x: 540
-    y: 540
   overlay_start:
     x: 270
     y: 270
@@ -57,11 +54,11 @@ layers:
         rel_position:
           source: alignment
           value:
-            x: center
+            x: 50%
             y: center
           parent: main_panel
           offset:
-            y: -30
+            y: -20
         values:
           text: --${title_text}--
           font_size: 56

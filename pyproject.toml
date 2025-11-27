@@ -36,6 +36,7 @@ target-version = "py312"
 extend-exclude = [
     "*/migrations/*.py",
     "staticfiles/*",
+    "examples/*",
 ]
 
 [tool.ruff.lint]

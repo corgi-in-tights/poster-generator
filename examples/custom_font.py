@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from poster_generator import Canvas, TextElement, RectangleElement
 from poster_generator.operations.text import randomize_text_color
 

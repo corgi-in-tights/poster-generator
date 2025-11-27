@@ -18,7 +18,7 @@ class YamlLoader(BaseCanvasLoader):
     Canvas loader for YAML configuration files.
     """
 
-    SCHEMA_VERSION = "1.1"
+    SCHEMA_VERSION = "1.0"
 
     def read_source(self, path: str) -> dict:
         with Path(path).open() as f:
@@ -84,7 +84,12 @@ class YamlLoader(BaseCanvasLoader):
             logger.debug("Deserializing layer: %s", layer_name)
             layer_info[layer_name] = self._parse_layer_settings(layer_data.get("settings", {}))
 
-            for element_id, element_data in layer_data["elements"].items():
+            elements_data = layer_data.get("elements")
+            if elements_data is None:
+                msg = f"Layer '{layer_name}' must have an 'elements' section."
+                raise ValueError(msg)
+
+            for element_id, element_data in elements_data.items():
                 logger.debug("Deserializing element: %s in layer: %s", element_id, layer_name)
                 element_info[element_id] = self._parse_element(element_id, element_data, layer_name)
 
@@ -121,7 +126,12 @@ class YamlLoader(BaseCanvasLoader):
         logger.info("Parsing element %s of type %s", element_id, element_data.get("type"))
         element_info = {}
 
-        element_info["type"] = element_data["type"]
+        element_type = element_data.get("type")
+        if element_type is None:
+            msg = f"Element '{element_id}' must have a 'type' specified."
+            raise ValueError(msg)
+
+        element_info["type"] = element_type
         element_info["layer"] = layer_name
         element_info["groups"] = element_data.get("groups", [])
 
@@ -181,8 +191,16 @@ class YamlLoader(BaseCanvasLoader):
         anchors: dict,
         canvas: Canvas,
     ):
-        source = rel_position_info["source"]
-        value = rel_position_info["value"]
+        source = rel_position_info.get("source")
+        if source is None:
+            msg = f"For element '{element_id}', 'source' must be specified in relative position info."
+            raise ValueError(msg)
+
+        value = rel_position_info.get("value")
+        if value is None:
+            msg = f"For element '{element_id}', 'value' must be specified in relative position info."
+            raise ValueError(msg)
+
         offset = rel_position_info.get("offset", (0, 0))
 
         if source == "anchor":
@@ -201,24 +219,28 @@ class YamlLoader(BaseCanvasLoader):
     def _resolve_anchor_position(self, element_id: str, anchor_name: str, anchors: dict):
         """Resolve position from an anchor."""
         if not isinstance(anchor_name, str):
-            msg = f"For element {element_id}, anchor name must be a string."
+            msg = f"For element '{element_id}', anchor name must be a string."
             raise TypeError(msg)
 
-        if anchor_name not in anchors:
-            msg = f"For element {element_id}, anchor '{anchor_name}' was not found."
+        anchor_position = anchors.get(anchor_name)
+        if anchor_position is None:
+            msg = f"For element '{element_id}', anchor '{anchor_name}' was not found."
             raise ValueError(msg)
-        return anchors[anchor_name]
+
+        return anchor_position
 
     def _resolve_element_reference_position(self, element_id: str, ref_element_id: str, canvas: Canvas):
         """Resolve position from another element."""
         if not isinstance(ref_element_id, str):
-            msg = f"For element {element_id}, reference element ID must be a string."
+            msg = f"For element '{element_id}', reference element ID must be a string."
             raise TypeError(msg)
 
-
-        if ref_element_id not in canvas.elements:
+        ref_element = canvas.elements.get(ref_element_id)
+        if ref_element is None:
             msg = f"Element '{ref_element_id}' not found for relative positioning of element '{element_id}'."
             raise ValueError(msg)
+
+        return ref_element.position
 
     def _resolve_alignment_position(self, element, value, rel_position_info: dict, canvas: Canvas):
         """Resolve position from alignment configuration."""
@@ -228,9 +250,12 @@ class YamlLoader(BaseCanvasLoader):
 
         x_align, y_align = yaml_resolver.resolve_point(value, default_x=None, default_y=None)
 
+        parent_element_id = rel_position_info.get("parent")
+        parent_element = canvas.get_first_element(identifier=parent_element_id) if parent_element_id else None
+
         return element.get_alignment_position(
             canvas,
-            parent_element_id=rel_position_info.get("parent"),
+            parent_element=parent_element,
             x_align=x_align,
             y_align=y_align,
         )
