@@ -59,7 +59,7 @@ class RectangleElement(DrawableElement):
             width (int, optional): Width of the rectangle in pixels. Defaults to 100.
             height (int, optional): Height of the rectangle in pixels. Defaults to 100.
             background (str, optional): background color as hex string. Defaults to "#000000".
-            outline (str, optional): Outline color as hex string. Defaults to None (no outline).
+            outline_color (str, optional): Outline color as hex string. Defaults to None (no outline).
             outline_width (int, optional): Width of the outline in pixels. Defaults to 1.
             radius (int, optional): Corner radius for rounded corners in pixels. Defaults to 0 (sharp corners).
             other_position (tuple, optional): Calculates width and height based on this position if provided.
@@ -153,3 +153,6 @@ class RectangleElement(DrawableElement):
             rect_y2 < y1 or  # Rectangle is above region
             rect_y1 > y2     # Rectangle is below region
         )
+
+    def get_size(self):
+        return self.width, self.height

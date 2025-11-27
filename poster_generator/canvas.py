@@ -1,7 +1,22 @@
 import logging
-from PIL import Image, ImageDraw
+import os
 
-logger = logging.getLogger(__name__)
+from PIL import Image
+from PIL import ImageDraw
+
+
+def setup_debug_logging():
+    logger = logging.getLogger("poster_generator")
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+    logger.addHandler(handler)
+    return logger
+
+
+IS_DEVELOPMENT = os.getenv("POSTER_GENERATOR_ENV") == "development"
+
+logger = setup_debug_logging() if IS_DEVELOPMENT else logging.getLogger("poster_generator")
 
 
 class Canvas:
@@ -67,12 +82,11 @@ class Canvas:
         Raises:
             ValueError: If an element with the same identifier already exists.
         """
-        logger.debug(
-            f"CANVAS: Adding element '{identifier}' to layer '{layer}' and groups {groups}"
-        )
+        logger.debug("Adding element '%s' to layer '%s' and groups %s", identifier, layer, groups)
 
         if identifier in self.elements:
-            raise ValueError(f"Element with identifier '{identifier}' already exists.")
+            msg = f"Element with identifier '{identifier}' already exists."
+            raise ValueError(msg)
 
         if groups is None:
             groups = []
@@ -155,7 +169,12 @@ class Canvas:
         return elements[0] if elements else None
 
     def get_elements(
-        self, *, identifiers=None, groups=None, layers=None, require_all=False
+        self,
+        *,
+        identifiers=None,
+        groups=None,
+        layers=None,
+        require_all=False,
     ):
         """
         Query and retrieve elements by identifiers, groups, or layers.
@@ -198,9 +217,7 @@ class Canvas:
 
             matches = (match_ident, match_group, match_layer)
 
-            if require_all and all(matches):
-                results.append(elem)
-            elif not require_all and any(matches):
+            if (require_all and all(matches)) or (not require_all and any(matches)):
                 results.append(elem)
 
         return results
@@ -260,23 +277,17 @@ class Canvas:
         for identifier in layer_info["elements"]:
             e = self.elements.get(identifier)
             if e is None:
-                logger.error(
-                    f"Element '{identifier}' listed in layer {layer_name} not found in registry."
-                )
+                logger.warning("Element '%s' listed in layer %s not found in registry.", identifier, layer_name)
                 continue
 
             if e.is_ready():
                 if global_op is not None:
                     global_op(e)
 
-                logger.debug(
-                    "CANVAS: Drawing element '%s' in layer '%s'", identifier, layer_name
-                )
+                logger.debug("CANVAS: Drawing element '%s' in layer '%s'", identifier, layer_name)
                 e.draw(self._draw, self._image, blend_settings={"opacity": opacity})
             else:
-                logger.error(
-                    f"Element '{identifier}' in layer {layer_name} is not ready and will be skipped."
-                )
+                logger.warning("Element '%s' in layer %s is not ready and will be skipped.", identifier, layer_name)
 
     @staticmethod
     def from_dict(data: dict) -> "Canvas":
@@ -296,6 +307,4 @@ class Canvas:
         height = data.get("height", 1350)
         background = data.get("background", "#fff")
 
-        canvas = Canvas(width=width, height=height, background=background)
-
-        return canvas
+        return Canvas(width=width, height=height, background=background)

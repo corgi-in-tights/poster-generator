@@ -30,7 +30,7 @@ class ElementFactory:
     def create_element(
         self,
         element_type: str,
-        position: Tuple[int, int],
+        position: Tuple[int, int] = (0, 0),
         values: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> DrawableElement:

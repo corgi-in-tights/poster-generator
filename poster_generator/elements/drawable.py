@@ -23,6 +23,8 @@ class DrawableElement(ABC):
         Args:
             position (tuple): The (x, y) coordinates for the element.
         """
+        if position is None:
+            position = (0, 0)
         self.position = position
     
     def bind_canvas(self, canvas: "Canvas", identifier: str):
@@ -71,14 +73,14 @@ class DrawableElement(ABC):
         eps = 1e-5
         return self.overlaps_region(x, y, x + eps, y + eps)
 
-    def apply_operation(self, operation):
+    def apply_operation(self, operation, params):
         """
         Apply a transformation operation to the drawable element.
         
         Args:
             operation: Callable that takes a DrawableElement and modifies it.
         """
-        operation(self)
+        operation(self, **params)
     
     @abstractmethod
     def get_size(self):
@@ -119,11 +121,7 @@ class DrawableElement(ABC):
         )
         self.update_position(pos)
 
-    def get_alignment_position(self, canvas: "Canvas", parent_element_id: str = None, x_align: str = "auto", y_align: str = "auto"):
-        if x_align not in ["auto", "left", "center", "right"]:
-            raise ValueError(f"Invalid x_align value: {x_align}")
-        if y_align not in ["auto", "top", "center", "bottom"]:
-            raise ValueError(f"Invalid y_align value: {y_align}")
+    def get_alignment_position(self, canvas: "Canvas", parent_element_id: str = None, x_align: float = None, y_align: float = None):
         
         width, height = self.get_size()
         

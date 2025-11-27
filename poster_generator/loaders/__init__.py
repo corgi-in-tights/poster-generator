@@ -1,5 +1,5 @@
 from .base import BaseCanvasLoader
-from .yaml_loader import YamlLoader
+from .yaml import YamlLoader
 
 __all__ = [
     "BaseCanvasLoader",
