@@ -10,15 +10,15 @@ if TYPE_CHECKING:
 
 
 class CircleElement(DrawableElement):
-    """A drawable circle element with support for background and outline colors.
+    """A drawable circle element with support for fill and outline colors.
 
     The circle is positioned by its center point and sized by its radius.
-    Supports both background and outline styling.
+    Supports both fill and outline styling.
 
     Attributes:
         radius (int): Circle radius in pixels.
-        background (str): background color as hex string (e.g., "#FF5733").
-        outline_color (str or None): Outline color as hex string, or None for no outline.
+        fill (str): fill color as hex string (e.g., "#FF5733").
+        outline (str or None): Outline color as hex string, or None for no outline.
         outline_width (int): Width of the outline in pixels.
 
     Example:
@@ -26,36 +26,36 @@ class CircleElement(DrawableElement):
         >>> circle = CircleElement(
         ...     position=(200, 200),
         ...     radius=75,
-        ...     background="#3498db"
+        ...     fill="#3498db"
         ... )
         >>>
         >>> # Circle with outline
         >>> outlined_circle = CircleElement(
         ...     position=(200, 200),
         ...     radius=75,
-        ...     background="#e74c3c",
-        ...     outline_color="#c0392b",
+        ...     fill="#e74c3c",
+        ...     outline="#c0392b",
         ...     outline_width=3
         ... )
     """
 
-    def __init__(self, position=(0, 0), radius=50, background="#000000", outline_color=None, outline_width=1):
+    def __init__(self, position=(0, 0), radius=None, fill="#000000", outline=None, outline_width=1):
         """Initialize a CircleElement with specified radius and styling.
 
         Args:
             position (tuple): The (x, y) coordinates for the center of the circle.
             radius (int, optional): Radius of the circle in pixels. Defaults to 50.
-            background (str, optional): background color as hex string. Defaults to "#000000".
-            outline_color (str, optional): Outline color as hex string. Defaults to None (no outline).
+            fill (str, optional): fill color as hex string. Defaults to "#000000".
+            outline (str, optional): Outline color as hex string. Defaults to None (no outline).
             outline_width (int, optional): Width of the outline in pixels. Defaults to 1.
         """
         super().__init__(position=position)
         self.radius = radius
-        self.background = background
-        self.outline_color = outline_color
+        self.fill = fill
+        self.outline = outline
         self.outline_width = outline_width
 
-    def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict) -> None:
+    def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict | None = None) -> None:
         """
         Draw the circle onto the canvas.
 
@@ -77,7 +77,7 @@ class CircleElement(DrawableElement):
 
         # Draw the circle (ellipse with equal width and height)
         image_draw.ellipse(
-            [(x1, y1), (x2, y2)], fill=self.background, outline=self.outline_color, width=self.outline_width,
+            [(x1, y1), (x2, y2)], fill=self.fill, outline=self.outline, width=self.outline_width,
         )
 
     def is_ready(self) -> bool:

@@ -11,6 +11,10 @@ if TYPE_CHECKING:
 
 DEFAULT_FONT = Path(__file__).parent.parent / "resources/fonts/open_sans.ttf"
 
+FONT_FAMILIES = {
+    "Open Sans": DEFAULT_FONT,
+}
+
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +33,7 @@ class TextElement(DrawableElement):
         font_size (int): Size of the font in points.
         max_width (int or None): Maximum width in pixels for text wrapping.
         wrap_style (str): Text wrapping style - "word", "char", or "none".
-        color (str): Text color in hex format (e.g., "#000000").
+        fill (str): Text color in hex format (e.g., "#000000").
         text_alignment (str): Text alignment style - "center", "left", or "right".
         font (ImageFont.FreeTypeFont): PIL ImageFont object for rendering.
         text (str): The actual text content, possibly wrapped.
@@ -41,7 +45,7 @@ class TextElement(DrawableElement):
         ...     font_size=24,
         ...     max_width=200,
         ...     wrap_style="word",
-        ...     color="#FF0000"
+        ...     fill="#FF0000"
         ... )
         >>> my_text.set_text("New text content")
     """
@@ -53,39 +57,42 @@ class TextElement(DrawableElement):
         position=(0, 0),
         text="",
         font_path=None,
+        font_family="Open Sans",
         font_size=20,
         max_width=None,
         wrap_style="word",
         text_alignment="left",
-        color="#000",
+        fill="#000",
     ):
         """Initialize a TextElement with specified properties.
 
         Args:
             position (tuple): The (x, y) coordinates for positioning the text element.
             text (str, optional): The text content to display. Defaults to "".
-            font_path (str, optional): Path to the font file. If None, uses DEFAULT_FONT. Defaults to None.
+            font_path (str, optional):
+                Path to the font file. If None, uses DEFAULT_FONT. Defaults to None. Overrides font_family.
+            font_family (str, optional): Used to select from in-built fonts, library default (open sans).
             font_size (int, optional): Size of the font in points. Defaults to 20.
             max_width (int, optional):
                 Maximum width for text wrapping. If None, no wrapping is applied. Defaults to None.
             wrap_style (str, optional): Style of text wrapping - "word", "char", or "none". Defaults to "word".
             text_alignment (str, optional): Text alignment - "center", "left", or "right". Defaults to "left".
-            color (str, optional): Text color in hex format (e.g., "#000000"). Defaults to "#000".
+            fill (str, optional): Text color in hex format (e.g., "#000000"). Defaults to "#000".
         """
         super().__init__(position)
-        self.font_path = font_path or DEFAULT_FONT
+        self.font_path = font_path or FONT_FAMILIES.get(font_family, DEFAULT_FONT)
         self.font_size = font_size
         self.max_width = max_width
         self.wrap_style = wrap_style
-        self.color = color
+        self.fill = fill
         self.text_alignment = text_alignment
 
-        self._reset_font()
+        self._reset_font(font_path)
         self.set_text(text)
 
-    def _reset_font(self):
+    def _reset_font(self, font_path):
         """Reset the font object based on current font_path and font_size."""
-        fk = (self.font_path, self.font_size)
+        fk = (font_path, self.font_size)
 
         # Attempt to cache across instances to avoid reloading same font multiple times
         if fk in (TextElement.font_cache or {}):
@@ -102,7 +109,7 @@ class TextElement(DrawableElement):
             font_size (int): The new font size in points.
         """
         self.font_size = font_size
-        self._reset_font()
+        self._reset_font(self.font_path)
 
     def set_font_path(self, font_path: str):
         """
@@ -112,7 +119,7 @@ class TextElement(DrawableElement):
             font_path (str): The new font file path.
         """
         self.font_path = font_path
-        self._reset_font()
+        self._reset_font(self.font_path)
 
     def set_text(self, t: str):
         """
@@ -197,7 +204,7 @@ class TextElement(DrawableElement):
 
         return (width, height)
 
-    def draw(self, draw: "ImageDraw.Draw", _, blend_settings: dict):
+    def draw(self, draw: "ImageDraw.Draw", _, blend_settings: dict | None = None):
         """
         Draw the text onto the canvas.
 
@@ -212,7 +219,7 @@ class TextElement(DrawableElement):
         if self.position is None:
             msg = "No position specified for TextElement drawing."
             raise ValueError(msg)
-        draw.text(self.position, self.text, font=self.font, fill=self.color, align=self.text_alignment)
+        draw.text(self.position, self.text, font=self.font, fill=self.fill, align=self.text_alignment)
 
     def is_ready(self):
         """
@@ -221,7 +228,7 @@ class TextElement(DrawableElement):
         Returns:
             bool: True if text and font are loaded.
         """
-        return self.text is not None and self.font is not None
+        return self.font is not None and self.text is not None and self.text != ""
 
     def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
         width, height = self.get_size()

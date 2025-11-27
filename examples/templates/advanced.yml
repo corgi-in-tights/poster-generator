@@ -30,7 +30,7 @@ layers:
         values:
           width: 540
           height: 540
-          background: "#3d9be3"
+          fill: "#3d9be3"
           radius: 10
 
       tagline_text:
@@ -44,7 +44,7 @@ layers:
         values:
           text: --${tagline_text}--
           font_size: 36
-          color: "#FFFFFF"
+          fill: "#FFFFFF"
           max_width: 1000
           wrap_style: "word"
           text_alignment: "center"
@@ -62,7 +62,7 @@ layers:
         values:
           text: --${title_text}--
           font_size: 56
-          color: "#bc4841"
+          fill: "#bc4841"
           max_width: 400
           text_alignment: "center"
 
@@ -77,7 +77,7 @@ layers:
         values:
           text: --${details_text}--
           font_size: 32
-          color: "#FFFFFF"
+          fill: "#FFFFFF"
           max_width: 1000
           wrap_style: "word"
           text_alignment: "center"

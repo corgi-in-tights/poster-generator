@@ -28,7 +28,7 @@ class ImageElement(DrawableElement):
         True
     """
 
-    def __init__(self, image_path, position=(0, 0), width=None, height=None):
+    def __init__(self, image_path=None, position=(0, 0), width=None, height=None):
         """Initialize an ImageElement with position and optional dimensions.
 
         Args:
@@ -42,36 +42,41 @@ class ImageElement(DrawableElement):
         self.height = height
         self.image = None
 
-        if image_path and Path(image_path).is_file():
-            self.update_image_path(image_path)
-            # Set from image for any missing attributes
-            if self.width is None:
-                self.width = self.image.width
-            if self.height is None:
-                self.height = self.image.height
+        if image_path is not None:
+            self.load_image(image_path)
 
-            self.resize_image(self.width, self.height)
-        else:
-            msg = f"Image path '{image_path}' is invalid or does not exist."
-            raise ValueError(msg)
 
     def resize_image(self, new_width, new_height):
         self.image = self.image.resize((new_width, new_height))
         self.width = new_width
         self.height = new_height
 
-    def update_image_path(self, new_path):
-        self.image_path = new_path
-        self.image = Image.open(new_path).convert("RGBA")
+    def set_image(self, new_image):
+        self.image = new_image.convert("RGBA")
+        # Set from image for any missing attributes
+        if self.width is None:
+            self.width = self.image.width
+        if self.height is None:
+            self.height = self.image.height
 
-    def draw(self, draw_ctx, canvas_image, blend_settings: dict):
+        self.resize_image(self.width, self.height)
+
+    def set_image_path(self, new_path):
+        if Path(new_path).is_file():
+            self.set_image(Image.open(new_path))
+        else:
+            msg = f"Image path '{new_path}' is invalid or does not exist."
+            raise ValueError(msg)
+
+
+    def draw(self, draw_ctx, canvas_image, blend_settings: dict | None = None):
         """
         Draw the image onto the canvas with alpha blending.
 
         Args:
             draw_ctx: PIL ImageDraw instance (not used for image drawing).
             canvas_image: PIL Image instance representing the canvas.
-            position: Optional (x, y) tuple to override the element's position.
+            blend_settings: Dictionary containing blend settings (opacity, etc.).
 
         Raises:
             ValueError: If no position is specified or no image is loaded.

@@ -1,4 +1,6 @@
+# ruff: noqa: PLR2004, INP001
 import pytest
+
 from poster_generator.loaders import YamlLoader
 
 
@@ -22,9 +24,9 @@ def basic_yaml_data():
                         "position": [0, 0],
                         "values": {"path": "test.jpg"},
                         "operations": {},
-                    }
+                    },
                 },
-            }
+            },
         },
     }
 
@@ -56,7 +58,7 @@ def test_variable_substitution(loader):
 def test_missing_variable_raises(loader):
     data = {"schema": "1.0", "settings": {"width": "--${missing}--"}}
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         loader.deserialize(data, variables={})
 
 
@@ -76,9 +78,9 @@ def test_relative_position_anchor(loader):
                         },
                         "values": {},
                         "operations": {},
-                    }
-                }
-            }
+                    },
+                },
+            },
         },
     }
 
@@ -109,8 +111,8 @@ def test_relative_position_element(loader):
                         "values": {},
                         "operations": {},
                     },
-                }
-            }
+                },
+            },
         },
     }
 
@@ -122,5 +124,5 @@ def test_relative_position_element(loader):
 def test_bad_schema(loader):
     data = {"schema": "2.0"}
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         loader.deserialize(data, variables={})

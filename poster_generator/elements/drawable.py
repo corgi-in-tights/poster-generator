@@ -52,7 +52,7 @@ class DrawableElement(ABC):
         self._canvas = canvas
 
     @abstractmethod
-    def draw(self, image_draw: ImageDraw.Draw, image: Image.Image, blend_settings: dict) -> None:
+    def draw(self, image_draw: ImageDraw.Draw, image: Image.Image, blend_settings: dict | None = None) -> None:
         pass
 
     @abstractmethod

@@ -38,7 +38,7 @@ layers:
         values:
           text: --${title_text}--
           font_size: 32
-          color: "#FFFFFF"
+          fill: "#FFFFFF"
       subtitle1:
         type: text
         groups:
@@ -53,4 +53,4 @@ layers:
         values:
           text: My subtitle :)
           font_size: 24
-          color: "#FFFFFF"
+          fill: "#FFFFFF"

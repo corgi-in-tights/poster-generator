@@ -12,7 +12,7 @@ bg = RectangleElement(
     (64, 64),
     width=width-128,
     height=height-128,
-    background="#4B5D4D",
+    fill="#4B5D4D",
     radius=16,
 )
 canvas.add_element("bg", bg)
@@ -21,7 +21,7 @@ reg_text = TextElement(
     None,
     text="I'm regular!",
     font_size=32,
-    color="#333333",
+    fill="#333333",
 )
 reg_text.update_position(canvas.get_alignment_position(reg_text, x_align="center", y_align="center"))
 reg_text.translate(0, -64)
@@ -31,7 +31,7 @@ special_text = TextElement(
     (reg_text.position[0], reg_text.position[1] + 64),
     text="I'M SPECIAL!",
     font_size=32,
-    color="#5E174D",
+    fill="#5E174D",
     font_path=Path.cwd() / "examples/assets/super_feel.ttf",
     max_width=128,
     text_alignment="center"

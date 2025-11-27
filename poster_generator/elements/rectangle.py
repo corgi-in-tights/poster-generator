@@ -13,13 +13,13 @@ class RectangleElement(DrawableElement):
     """A drawable rectangle element with support for rounded corners and styling.
 
     The rectangle is positioned by its top-left corner and can have rounded corners
-    specified by a radius parameter. Supports both background and outline colors.
+    specified by a radius parameter. Supports both fill and outline colors.
 
     Attributes:
         width (int): Rectangle width in pixels.
         height (int): Rectangle height in pixels.
-        background (str): background color as hex string (e.g., "#FF5733").
-        outline_color (str or None): Outline color as hex string, or None for no outline.
+        fill (str): Fill color as hex string (e.g., "#FF5733").
+        outline (str or None): Outline color as hex string, or None for no outline.
         outline_width (int): Width of the outline in pixels.
         radius (int): Corner radius in pixels for rounded corners (0 for sharp corners).
 
@@ -28,14 +28,14 @@ class RectangleElement(DrawableElement):
         ...     position=(100, 100),
         ...     width=300,
         ...     height=200,
-        ...     background="#FF5733"
+        ...     fill="#FF5733"
         ... )
         >>>
         >>> rounded_rect = RectangleElement(
         ...     position=(100, 100),
         ...     width=300,
         ...     height=200,
-        ...     background="#3498db",
+        ...     fill="#3498db",
         ...     outline="#2c3e50",
         ...     outline_width=3,
         ...     radius=20
@@ -45,10 +45,10 @@ class RectangleElement(DrawableElement):
     def __init__(
         self,
         position=(0, 0),
-        width=100,
-        height=100,
-        background="#000000",
-        outline_color=None,
+        width=None,
+        height=None,
+        fill="#000000",
+        outline=None,
         outline_width=1,
         radius=0,
         other_position=None,
@@ -59,8 +59,8 @@ class RectangleElement(DrawableElement):
             position (tuple): The (x, y) coordinates for the top-left corner of the rectangle.
             width (int, optional): Width of the rectangle in pixels. Defaults to 100.
             height (int, optional): Height of the rectangle in pixels. Defaults to 100.
-            background (str, optional): background color as hex string. Defaults to "#000000".
-            outline_color (str, optional): Outline color as hex string. Defaults to None (no outline).
+            fill (str, optional): Fill color as hex string. Defaults to "#000000".
+            outline (str, optional): Outline color as hex string. Defaults to None (no outline).
             outline_width (int, optional): Width of the outline in pixels. Defaults to 1.
             radius (int, optional): Corner radius for rounded corners in pixels. Defaults to 0 (sharp corners).
             other_position (tuple, optional): Calculates width and height based on this position if provided.
@@ -72,12 +72,12 @@ class RectangleElement(DrawableElement):
         self.width = width
         self.height = height
 
-        self.background = background
-        self.outline_color = outline_color
+        self.fill = fill
+        self.outline = outline
         self.outline_width = outline_width
         self.radius = radius
 
-    def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict) -> None:
+    def draw(self, image_draw: "ImageDraw.Draw", image: "Image.Image", blend_settings: dict | None = None) -> None:
         """
         Draw the rectangle onto the canvas.
 
@@ -102,14 +102,14 @@ class RectangleElement(DrawableElement):
             image_draw.rounded_rectangle(
                 [(x, y), (x2, y2)],
                 radius=self.radius,
-                fill=self.background,
-                outline=self.outline_color,
+                fill=self.fill,
+                outline=self.outline,
                 width=self.outline_width,
             )
         else:
             # Draw regular rectangle
             image_draw.rectangle(
-                [(x, y), (x2, y2)], fill=self.background, outline=self.outline_color, width=self.outline_width
+                [(x, y), (x2, y2)], fill=self.fill, outline=self.outline, width=self.outline_width
             )
 
     def is_ready(self) -> bool:

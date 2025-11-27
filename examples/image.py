@@ -23,7 +23,7 @@ text_element = TextElement(
     (100, height//2 - 64),
     text="This time, with a background!",
     font_size=64,
-    color="#333333",
+    fill="#333333",
 )
 canvas.add_element("title", text_element)
 
