@@ -2,13 +2,9 @@
 """Tests for individual element types."""
 
 import pytest
-from PIL import Image
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
-from poster_generator.elements import CircleElement
-from poster_generator.elements import ImageElement
-from poster_generator.elements import RectangleElement
-from poster_generator.elements import TextElement
+from poster_generator.elements import EllipseElement, ImageElement, RectangleElement, TextElement
 from poster_generator.factories.element import ElementFactory
 
 # ==================== TextElement Tests ====================
@@ -238,7 +234,7 @@ def test_rectangle_element_draw_outline():
 
 def test_rectangle_element_rounded_corners():
     """Test drawing a rectangle with rounded corners."""
-    elem = RectangleElement(position=(10, 10), width=80, height=80, fill="#00FF00", radius=10)
+    elem = RectangleElement(position=(10, 10), width=80, height=80, fill="#00FF00", border_radius=10)
 
     img = Image.new("RGB", (100, 100), "#FFFFFF")
     draw_ctx = ImageDraw.Draw(img)
@@ -261,42 +257,43 @@ def test_rectangle_element_overlaps_region():
     assert elem.overlaps_region(200, 200, 300, 300) is False
 
 
-# ==================== CircleElement Tests ====================
+# ==================== EllipseElement Tests ====================
 
 
-def test_circle_element_initialization():
-    """Test basic CircleElement initialization."""
-    elem = CircleElement(position=(100, 50), radius=25, fill="#FF0000")
+def test_ellipse_element_initialization():
+    """Test basic EllipseElement initialization."""
+    elem = EllipseElement(position=(100, 50), width=50, height=50, fill="#FF0000")
 
     assert elem.position == (100, 50)
-    assert elem.radius == 25
+    assert elem.width == 50
+    assert elem.height == 50
     assert elem.fill == "#FF0000"
 
 
-def test_circle_element_is_ready():
-    """Test that CircleElement is ready when radius is set."""
-    elem = CircleElement(position=(0, 0), radius=50)
+def test_ellipse_element_is_ready():
+    """Test that EllipseElement is ready when width and height are set."""
+    elem = EllipseElement(position=(0, 0), width=100, height=100)
 
     assert elem.is_ready() is True
 
 
-def test_circle_element_not_ready_without_radius():
-    """Test that CircleElement is not ready without radius."""
-    elem = CircleElement(position=(0, 0))
+def test_ellipse_element_not_ready_without_dimensions():
+    """Test that EllipseElement is not ready without width/height."""
+    elem = EllipseElement(position=(0, 0))
 
     assert elem.is_ready() is False
 
 
-def test_circle_element_get_size():
-    """Test that CircleElement.get_size() returns diameter."""
-    elem = CircleElement(position=(0, 0), radius=50)
+def test_ellipse_element_get_size():
+    """Test that EllipseElement.get_size() returns width and height."""
+    elem = EllipseElement(position=(0, 0), width=100, height=100)
 
     assert elem.get_size() == (100, 100)
 
 
-def test_circle_element_draw_filled():
-    """Test drawing a filled circle."""
-    elem = CircleElement(position=(50, 50), radius=30, fill="#0000FF")
+def test_ellipse_element_draw_filled():
+    """Test drawing a filled ellipse."""
+    elem = EllipseElement(position=(20, 20), width=60, height=60, fill="#0000FF")
 
     img = Image.new("RGB", (100, 100), "#FFFFFF")
     draw_ctx = ImageDraw.Draw(img)
@@ -308,9 +305,9 @@ def test_circle_element_draw_filled():
     assert center_pixel == (0, 0, 255)
 
 
-def test_circle_element_draw_outline():
-    """Test drawing a circle with outline."""
-    elem = CircleElement(position=(50, 50), radius=30, outline="#FF0000", outline_width=2)
+def test_ellipse_element_draw_outline():
+    """Test drawing an ellipse with outline."""
+    elem = EllipseElement(position=(20, 20), width=60, height=60, outline="#FF0000", outline_width=2)
 
     img = Image.new("RGB", (100, 100), "#FFFFFF")
     draw_ctx = ImageDraw.Draw(img)
@@ -318,30 +315,30 @@ def test_circle_element_draw_outline():
     elem.draw(draw_ctx, img)
 
     # Check that red outline exists
-    # Sample point on the circle edge
+    # Sample point on the ellipse edge
     edge_pixel = img.getpixel((50, 20))
     assert edge_pixel == (255, 0, 0)
 
 
-def test_circle_element_overlaps_point():
-    """Test overlaps_point detection using distance."""
-    elem = CircleElement(position=(50, 50), radius=25)
+def test_ellipse_element_overlaps_point():
+    """Test overlaps_point detection using ellipse equation."""
+    elem = EllipseElement(position=(25, 25), width=50, height=50)
 
     # Center point should overlap
     assert elem.overlaps_point(50, 50) is True
 
-    # Point within radius should overlap
+    # Point within ellipse should overlap
     assert elem.overlaps_point(60, 50) is True
 
-    # Point outside radius should not overlap
+    # Point outside ellipse should not overlap
     assert elem.overlaps_point(100, 50) is False
 
 
-def test_circle_element_overlaps_region():
+def test_ellipse_element_overlaps_region():
     """Test overlaps_region detection."""
-    elem = CircleElement(position=(50, 50), radius=25)
+    elem = EllipseElement(position=(25, 25), width=50, height=50)
 
-    # Circle bounding box is (25,25) to (75,75)
+    # Ellipse bounding box is (25,25) to (75,75)
     assert elem.overlaps_region(0, 0, 100, 100) is True
     assert elem.overlaps_region(40, 40, 60, 60) is True
     assert elem.overlaps_region(100, 100, 200, 200) is False
@@ -372,13 +369,14 @@ def test_factory_create_rectangle_element():
     assert elem.height == 50
 
 
-def test_factory_create_circle_element():
-    """Test creating CircleElement through factory."""
+def test_factory_create_ellipse_element():
+    """Test creating EllipseElement through factory."""
     factory = ElementFactory()
-    elem = factory.create_element("circle", position=(50, 50), values={"radius": 25, "fill": "#00FF00"})
+    elem = factory.create_element("ellipse", position=(50, 50), values={"width": 50, "height": 50, "fill": "#00FF00"})
 
-    assert isinstance(elem, CircleElement)
-    assert elem.radius == 25
+    assert isinstance(elem, EllipseElement)
+    assert elem.width == 50
+    assert elem.height == 50
 
 
 def test_factory_unknown_type_raises():

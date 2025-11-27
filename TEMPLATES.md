@@ -203,9 +203,10 @@ layers:
 - radius: Corner radius in pixels for rounded corners (0 for sharp corners)
 
 
-### CircleElement
-"type: circle"
-- radius: Circle radius in pixels.
+### EllipseElement
+"type: ellipse"
+- width: Ellipse width in pixels.
+- height: Ellipse height in pixels.
 - background: background color as hex string (e.g., "#FF5733").
 - outline_color: Outline color as hex string, or None for no outline.
 - outline_width: Width of the outline in pixels.

@@ -391,9 +391,9 @@ def test_render_background_color():
 
     assert image.size == (512, 512)
     # Check center and corners for background color
-    assert image.getpixel((256, 256)) == (20, 134, 64)
-    assert image.getpixel((0, 0)) == (20, 134, 64)
-    assert image.getpixel((511, 511)) == (20, 134, 64)
+    assert image.getpixel((256, 256)) == (20, 134, 64, 255)
+    assert image.getpixel((0, 0)) == (20, 134, 64, 255)
+    assert image.getpixel((511, 511)) == (20, 134, 64, 255)
 
 
 # ==================== Cropping ====================
