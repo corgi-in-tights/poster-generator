@@ -2,13 +2,13 @@ from pathlib import Path
 from poster_generator import JsonLoader
 
 template = "advanced"
-path = str(Path.cwd() / f"examples/templates/{template}.json")
+path = f"examples/templates/{template}.json"
 print("Loading from:", path)
 
 loader = JsonLoader()
 
 variables = {
-    "background_image": str(Path.cwd() / "examples/assets/my_background.jpg"),
+    "background_image": "assets/my_background.jpg",
     "tagline_text": "Your Tagline Here",
     "title_text": "Your Title Here",
     "details_text": "Additional details here"

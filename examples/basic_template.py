@@ -3,7 +3,7 @@ from pathlib import Path
 from poster_generator import YamlLoader
 
 template = "basic"
-path = str(Path.cwd() / f"examples/templates/{template}.yml")
+path = f"examples/templates/{template}.yml"
 print("Loading from:", path)
 
 loader = YamlLoader()
@@ -11,7 +11,7 @@ loader = YamlLoader()
 variables = {
     "hue_shift": 45,
     "title_text": "Hello, Poster Generator!",
-    "background_image": str(Path.cwd() / "examples/assets/my_background.jpg"),
+    "background_image": "assets/my_background.jpg",
 }
 
 canvas = loader.build_canvas(path, variables)
