@@ -2,37 +2,14 @@
 
 This document provides an in-depth overview of the template loaders that come with this library, supporting both YAML and JSON formats.
 
-## Table of Contents
-- [Overview](#overview)
-- [Template Format](#template-format)
-- [Variable Substitution](#variable-substitution)
-- [Element Types](#element-types)
-- [Positioning](#positioning)
-- [Operations](#operations)
-- [Custom Extensions](#custom-extensions)
-
----
 
 ## Overview
 
-Templates allow you to define reusable poster layouts with variable substitution, making it easy to generate multiple variations from a single design. The library supports both YAML and JSON formats through `YamlLoader` and `JsonLoader`.
+Templates allow you to define reusable poster layouts with variable substitution, making it easy to generate multiple variations from a single design
+This project supports both YAML and JSON formats through `YamlLoader` and `JsonLoader`.
 
-**Basic usage:**
-```python
-from poster_generator import YamlLoader
 
-loader = YamlLoader()
-canvas = loader.build_canvas("templates/basic.yml", variables={
-    "hue_shift": 45,
-    "title_text": "Hello, Poster Generator!",
-    "background_image": "assets/my_background.jpg",
-})
-image = canvas.render()
-```
-
----
-
-## Template Format
+## Format
 
 Templates follow a consistent structure across both YAML and JSON formats:
 
@@ -88,13 +65,10 @@ layers:             # Layers organize elements (render bottom-to-top)
 }
 ```
 
----
-
 ## Variable Substitution
 
 Use `--${variable_name}--` syntax to inject dynamic values into your templates:
 
-**YAML example:**
 ```yaml
 elements:
   title:
@@ -105,31 +79,20 @@ elements:
       fill: --${color}--
 ```
 
-**JSON example:**
-```json
-{
-  "values": {
-    "text": "--${title_text}--",
-    "font_size": "--${size}--",
-    "fill": "--${color}--"
-  }
-}
-```
-
 **Python usage:**
 ```python
-canvas = loader.build_canvas("template.yml", variables={
+template_variables = {
     "title_text": "My Title",
     "size": 48,
     "color": "#FF0000"
-})
+}
+canvas = loader.build_canvas("template.yml", template_variables)
 ```
 
 Variables work with all value types: strings, numbers, colors, and nested structures.
 
----
 
-## Element Types
+## Elements
 
 ### TextElement
 **Type:** `text`
@@ -144,20 +107,6 @@ Renders text with custom fonts, wrapping, alignment, and styling.
 - `max_width` (int, optional): Maximum width before wrapping
 - `wrap_style` (str, optional): `'none'`, `'word'` (default), or `'char'`
 - `text_alignment` (str, optional): `'left'` (default), `'center'`, or `'right'`
-
-**Example (YAML):**
-```yaml
-title:
-  type: text
-  position: {x: 100, y: 100}
-  values:
-    text: "Hello, World!"
-    font_size: 64
-    fill: "#FFFFFF"
-    font_family: "Open Sans"
-    max_width: 400
-    text_alignment: "center"
-```
 
 **Example (JSON):**
 ```json
@@ -193,7 +142,9 @@ Displays an image from a file path with optional resizing.
 ```yaml
 background:
   type: image
-  position: {x: 0, y: 0}
+  position:
+    x: 0
+    y: 0
   operations:
     apply_hue_shift:
       degrees: --${hue_shift}--
@@ -215,11 +166,6 @@ Renders a rectangle with optional rounded corners, fill, and outline.
 - `outline` (str|list, optional): Outline color
 - `outline_width` (int, optional): Outline thickness in pixels (default: 1)
 - `border_radius` (int, optional): Corner radius for rounded corners (default: 0)
-
-**Colors can be specified as:**
-- Hex string: `"#FF5733"`
-- RGBA list: `[255, 87, 51, 128]`
-- RGBA dict: `{"red": 255, "green": 87, "blue": 51, "alpha": 128}`
 
 **Example (JSON with semi-transparent fill):**
 ```json
@@ -267,27 +213,20 @@ circle:
     outline_width: 3
 ```
 
----
+### Fields
+**Colors can be specified as:** (color, fill, background)
+- Hex string: `"#FF5733"`
+- RGBA list: `[255, 87, 51, 128]`
+- RGBA dict: `{"red": 255, "green": 87, "blue": 51, "alpha": 128}`
 
-## Positioning
+**Positions can be specified as:** (position, offset, value)
+- Pixels: `50`, `-1200`
+- Percentages: `10%`, `90%`
+- Floats: `0.5`
+- Alphabetical: `left` (0.0), `center` (0.5), `right` (1.0)
 
-Elements require either `position` or `rel_position`. Positioning is resolved during template loading.
 
-### Absolute Positioning
-
-**YAML:**
-```yaml
-position:
-  x: 100
-  y: 200
-```
-
-**JSON:**
-```json
-"position": {"x": 100, "y": 200}
-```
-
-### Relative Positioning
+## Relative Positioning
 
 #### Anchor-based
 Define anchors at the template root, then reference them:
@@ -315,6 +254,7 @@ layers:
 Position relative to another element (must be defined first):
 
 ```yaml
+# Positioned 30px below title1
 subtitle:
   rel_position:
     source: element
@@ -322,40 +262,29 @@ subtitle:
     offset:
       x: 0
       y: 30
-  # Positioned 30px below title1
 ```
 
 #### Alignment-based
 Use alignment keywords for positioning relative to canvas or parent element:
 
-**JSON example:**
-```json
-{
-  "rel_position": {
-    "source": "alignment",
-    "value": {"x": "center", "y": "center"}
-  }
-}
+```yaml
+rel_position:
+  source: alignment
+  value:
+    x: center
+    y: center
 ```
 
-**With parent element:**
-```json
-{
-  "rel_position": {
-    "source": "alignment",
-    "value": {"x": "50%", "y": "70%"},
-    "parent": "main_panel",
-    "offset": {"y": -20}
-  }
-}
+```yaml
+rel_position:
+  source: alignment
+  value:
+    x: 50%
+    y: 70%
+  parent: main_panel
+  offset:
+    y: -20
 ```
-
-**Supported alignment values:**
-- `"center"` or `"50%"`: Center alignment
-- `"10%"`, `"20%"`, etc.: Percentage-based positioning
-- `"left"`, `"right"`, `"top"`, `"bottom"`: Edge alignment
-
----
 
 ## Operations
 
@@ -363,7 +292,9 @@ Operations allow you to transform elements during template loading. They're appl
 
 ### Built-in Operations
 
-#### For Images: `apply_hue_shift`
+### Image-based
+
+#### `apply_hue_shift`
 Shifts the hue of an image by a specified number of degrees.
 
 **YAML:**
@@ -373,18 +304,14 @@ operations:
     degrees: 45
 ```
 
-**JSON:**
-```json
-"operations": {
-  "apply_hue_shift": {"degrees": 45}
-}
-```
-
-#### For Images: `set_hue_from_hex`
+#### `set_hue_from_hex`
 Sets the hue based on a hex color value.
 
-#### For Text: `randomize_text_color`
-Randomizes the text color.
+### Text-based
+
+#### `randomize_text_color`
+Randomizes the text color, mostly as an example.
+
 
 ### Custom Operations
 
@@ -413,8 +340,6 @@ operations:
   myapp.uppercase_and_color:
     new_color: "#f7e22f"
 ```
-
----
 
 ## Custom Extensions
 
@@ -477,79 +402,76 @@ special_text:
     font_size: 32
 ```
 
----
 
 ## Complete Example
 
 Here's a full template demonstrating multiple features:
 
-**advanced.json:**
-```json
-{
-  "schema": "1.0",
-  "settings": {
-    "width": 1080,
-    "height": 1350,
-    "background_color": "#000000"
-  },
-  "layers": {
-    "background": {
-      "elements": {
-        "photo_bg": {
-          "type": "image",
-          "position": {"x": 0, "y": 0},
-          "values": {
-            "image_path": "--${background_image}--",
-            "width": 1080,
-            "height": 1350
-          }
-        }
-      }
-    },
-    "overlay_panel": {
-      "elements": {
-        "main_panel": {
-          "type": "rectangle",
-          "rel_position": {
-            "source": "alignment",
-            "value": {"x": "center", "y": "center"}
-          },
-          "values": {
-            "fill": {"red": 120, "blue": 200, "green": 120, "alpha": 20},
-            "width": 650,
-            "height": 750,
-            "outline": [255, 255, 255, 110],
-            "outline_width": 2,
-            "border_radius": 10
-          }
-        },
-        "title_text": {
-          "type": "text",
-          "rel_position": {
-            "source": "alignment",
-            "value": {"x": "center", "y": "center"},
-            "parent": "main_panel"
-          },
-          "values": {
-            "text": "--${title_text}--",
-            "font_size": 56,
-            "fill": "#bc4841",
-            "max_width": 400,
-            "text_alignment": "center"
-          }
-        }
-      }
-    }
-  }
-}
+**advanced.yml:**
+```yaml
+schema: "1.0"
+
+settings:
+  width: 1080
+  height: 1350
+  background_color: "#000000"
+
+layers:
+  background:
+    elements:
+      photo_bg:
+        type: image
+        position:
+          x: 0
+          y: 0
+        values:
+          image_path: --${background_image}--
+          width: 1080
+          height: 1350
+
+  overlay_panel:
+    elements:
+      main_panel:
+        type: rectangle
+        rel_position:
+          source: alignment
+          value:
+            x: center
+            y: center
+        values:
+          fill:
+            red: 120
+            blue: 200
+            green: 120
+            alpha: 20
+          width: 650
+          height: 750
+          outline: [255, 255, 255, 110]
+          outline_width: 2
+          border_radius: 10
+
+      title_text:
+        type: text
+        rel_position:
+          source: alignment
+          value:
+            x: center
+            y: center
+          parent: main_panel
+        values:
+          text: --${title_text}--
+          font_size: 56
+          fill: "#bc4841"
+          max_width: 400
+          text_alignment: center
 ```
 
 **Python usage:**
 ```python
-from poster_generator import JsonLoader
+from poster_generator import YamlLoader
 
-loader = JsonLoader()
-canvas = loader.build_canvas("templates/advanced.json", variables={
+loader = YamlLoader()
+canvas = loader.build_canvas("templates/advanced.yml", variables={
     "background_image": "assets/my_background.jpg",
     "title_text": "Your Title Here"
 })

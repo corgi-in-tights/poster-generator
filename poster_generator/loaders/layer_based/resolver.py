@@ -1,5 +1,7 @@
 import re
 
+from poster_generator.exceptions import VariableNotDefinedError
+
 
 class PointResolver:
     POINT_DIMENSIONS = 2
@@ -122,7 +124,7 @@ class LayerBasedResolver:
             var_name = match.group(1)
             if var_name not in self.variables:
                 msg = f"Missing variable for template: {var_name}"
-                raise AttributeError(msg)
+                raise VariableNotDefinedError(msg)
             value = self.variables[var_name]
 
         return self.attempt_additional_resolution(key, value)

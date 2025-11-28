@@ -1,6 +1,7 @@
 # ruff: noqa: PLR2004, INP001
 import pytest
 
+from poster_generator.exceptions import VariableNotDefinedError
 from poster_generator.loaders import YamlLoader
 
 
@@ -58,7 +59,7 @@ def test_variable_substitution(loader):
 def test_missing_variable_raises(loader):
     data = {"schema": "1.0", "settings": {"width": "--${missing}--"}}
 
-    with pytest.raises(ValueError):  # noqa: PT011
+    with pytest.raises(VariableNotDefinedError):
         loader.deserialize(data, variables={})
 
 
