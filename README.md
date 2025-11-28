@@ -64,12 +64,14 @@ Check out the `examples/` directory for concrete examples and [TEMPLATES.md](htt
 
 ### Elements
 
-Elements are the building blocks of your poster, these come in-built:
+Elements are the basic pieces you use to build a poster.  
+The library comes with a few ready-to-use ones:
 
-- **TextElement** ('text')
-- **ImageElement** ('image')
-- **RectangleElement** ('rectangle')
-- **EllipseElement** ('ellipse')
+- **TextElement** (`text`) – Regular text with custom fonts, wrapping, alignment, and opacity.
+- **ImageElement** (`image`) – Shows an image from a file path and lets you resize it however you need.
+- **RectangleElement** (`rectangle`) – A simple box shape with size, corner radius, fill, and opacity options.
+- **EllipseElement** (`ellipse`) – Like a rectangle, but drawn as an oval/circle instead.
+
 
 To learn how to register custom elements for templates, please see [TEMPLATES.md](https://github.com/corgi-in-tights/poster-generator/blob/main/TEMPLATES.md).
 
