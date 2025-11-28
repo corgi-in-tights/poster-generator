@@ -1,8 +1,10 @@
+import random
 from pathlib import Path
 
 from poster_generator import Canvas, TextElement, RectangleElement
-from poster_generator.operations.text import randomize_text_color
-from poster_generator.utils import get_alignment_position
+from poster_generator.operations import randomize_text_color
+from poster_generator.elements.text import get_font_manager, register_font_family
+
 
 width = 512
 height = 512
@@ -20,26 +22,31 @@ canvas.add_element("bg", bg)
 # This is for width/height calculations
 bg.align_to(x_align=0.5, y_align=0.5)
 
-reg_text = TextElement(
-    text="I'm regular!",
+
+random_text = TextElement(
+    text="I'm random!",
     font_size=32,
     fill="#333333",
+    font_family=random.choice(get_font_manager().get_all_families()),
 )
-canvas.add_element("reg_text", reg_text)
-reg_text.align_to(x_align=0.5, y_align=0.4)
+canvas.add_element("random_text", random_text)
+random_text.align_to(x_align=0.5, y_align=0.4)
+
+
+register_font_family("Super Feel", Path.cwd() / "examples/assets/super_feel.ttf")
 
 special_text = TextElement(
-    position=(reg_text.position[0], reg_text.position[1] + 64),
+    position=(random_text.position[0], random_text.position[1] + 64),
     text="I'M SPECIAL!",
     font_size=32,
     fill="#5E174D",
-    font_path=Path.cwd() / "examples/assets/super_feel.ttf",
+    font_family="Super Feel",
     max_width=128,
     text_alignment="center"
 )
 special_text.apply_operation(randomize_text_color)
 canvas.add_element("special_text", special_text)
-special_text.update_position((reg_text.position[0], reg_text.position[1] + 64))
+special_text.update_position((random_text.position[0], random_text.position[1] + 64))
 
 image = canvas.render()
 image.show()

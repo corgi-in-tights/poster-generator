@@ -1,11 +1,11 @@
 from pathlib import Path
-from poster_generator.loaders import YamlLoader
+from poster_generator import JsonLoader
 
 template = "advanced"
-path = str(Path.cwd() / f"examples/templates/{template}.yml")
+path = str(Path.cwd() / f"examples/templates/{template}.json")
 print("Loading from:", path)
 
-loader = YamlLoader()
+loader = JsonLoader()
 
 variables = {
     "background_image": str(Path.cwd() / "examples/assets/my_background.jpg"),

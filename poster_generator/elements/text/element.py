@@ -2,9 +2,9 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from PIL import ImageFont
+from poster_generator.elements.abstract import DrawableElement
 
-from .abstract.drawable import DrawableElement
+from .fonts import get_font_manager
 
 if TYPE_CHECKING:
     from PIL import ImageDraw
@@ -16,7 +16,6 @@ FONT_FAMILIES = {
 }
 
 logger = logging.getLogger(__name__)
-
 
 class TextElement(DrawableElement):
     """A drawable text element with support for wrapping, alignment, and font caching.
@@ -49,15 +48,11 @@ class TextElement(DrawableElement):
         ... )
         >>> my_text.set_text("New text content")
     """
-
-    font_cache = {}
-
     def __init__(  # noqa: PLR0913
         self,
         *,
         position=(0, 0),
         text="",
-        font_path=None,
         font_family="Open Sans",
         font_size=20,
         max_width=None,
@@ -81,26 +76,17 @@ class TextElement(DrawableElement):
             fill (str, optional): Text color in hex format (e.g., "#000000"). Defaults to "#000".
         """
         super().__init__(position)
-        self.font_path = font_path or FONT_FAMILIES.get(font_family, DEFAULT_FONT)
         self.font_size = font_size
         self.max_width = max_width
         self.wrap_style = wrap_style
         self.fill = fill
         self.text_alignment = text_alignment
 
-        self._reset_font(font_path)
+        self.set_font(font_family, font_size)
         self.set_text(text)
 
-    def _reset_font(self, font_path):
-        """Reset the font object based on current font_path and font_size."""
-        fk = (font_path, self.font_size)
-
-        # Attempt to cache across instances to avoid reloading same font multiple times
-        if fk in (TextElement.font_cache or {}):
-            self.font = TextElement.font_cache[fk]
-        else:
-            self.font = ImageFont.truetype(self.font_path, self.font_size)
-            TextElement.font_cache[(self.font_path, self.font_size)] = self.font
+    def set_font(self, font_family: str, size: int | None = None):
+        self.font = get_font_manager().get_font(font_family, size or self.font_size)
 
     def set_font_size(self, font_size: int):
         """
@@ -110,16 +96,6 @@ class TextElement(DrawableElement):
             font_size (int): The new font size in points.
         """
         self.font_size = font_size
-        self._reset_font(self.font_path)
-
-    def set_font_path(self, font_path: str):
-        """
-        Set the font path and update the font object.
-
-        Args:
-            font_path (str): The new font file path.
-        """
-        self.font_path = font_path
         self._reset_font(self.font_path)
 
     def set_text(self, t: str):

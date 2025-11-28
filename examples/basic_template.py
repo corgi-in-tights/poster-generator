@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from poster_generator.loaders import YamlLoader
+from poster_generator import YamlLoader
 
 template = "basic"
 path = str(Path.cwd() / f"examples/templates/{template}.yml")

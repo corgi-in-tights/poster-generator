@@ -328,3 +328,46 @@ rel_position:
 
 
 
+
+
+Custom operations can be made:
+```python
+from poster_generator.operations import register_operation
+
+def uppercase_and_color(text_obj, new_color):
+    text_obj["text"] = text_obj["text"].upper()
+    text_obj["color"] = new_color
+    return text_obj
+
+my_text_element.apply_operation(lambda t: uppercase_and_color(t, "#f7e22f"))
+```
+
+
+### Custom Element Types
+
+Register your own element types using the factory pattern:
+
+```python
+from poster_generator.elements import DrawableElement, register_element_type
+
+class CustomElement(DrawableElement):
+    def __init__(self, position, custom_param=None):
+        super().__init__(position)
+        self.custom_param = custom_param
+    
+    def draw(self, draw, image, blend_settings: dict):
+        # Your drawing logic
+        pass
+    
+    def is_ready(self):
+        return True
+    
+    def overlaps_region(self, x1, y1, x2, y2):
+        return False
+    
+    def apply_operation(self, operation):
+        pass
+
+# Register the custom element
+register_element_type("custom", CustomElement)
+```
