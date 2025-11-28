@@ -1,9 +1,7 @@
-from pathlib import Path
-
 from poster_generator import YamlLoader
 
 template = "basic"
-path = f"examples/templates/{template}.yml"
+path = f"templates/{template}.yml"
 print("Loading from:", path)
 
 loader = YamlLoader()

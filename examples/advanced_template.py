@@ -1,8 +1,7 @@
-from pathlib import Path
 from poster_generator import JsonLoader
 
 template = "advanced"
-path = f"examples/templates/{template}.json"
+path = f"templates/{template}.json"
 print("Loading from:", path)
 
 loader = JsonLoader()

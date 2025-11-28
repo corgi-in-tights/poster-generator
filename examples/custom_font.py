@@ -1,5 +1,4 @@
 import random
-from pathlib import Path
 
 from poster_generator import Canvas, TextElement, RectangleElement
 from poster_generator.operations import randomize_text_color
@@ -33,7 +32,7 @@ canvas.add_element("random_text", random_text)
 random_text.align_to(x_align=0.5, y_align=0.4)
 
 
-register_font_family("Super Feel", Path.cwd() / "examples/assets/super_feel.ttf")
+register_font_family("Super Feel", "assets/super_feel.ttf")
 
 special_text = TextElement(
     position=(random_text.position[0], random_text.position[1] + 64),
