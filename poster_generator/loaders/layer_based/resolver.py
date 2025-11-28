@@ -117,15 +117,15 @@ class LayerBasedResolver:
         if not isinstance(value, str):
             return self.attempt_additional_resolution(key, value)
 
-        def replace_var(match):
+        match = re.match(self.VARIABLE_PATTERN, value)
+        if match:
             var_name = match.group(1)
-            if var_name in self.variables:
-                return str(self.variables[var_name])
-            msg = f"Undefined variable: {var_name}"
-            raise ValueError(msg)
+            if var_name not in self.variables:
+                msg = f"Missing variable for template: {var_name}"
+                raise AttributeError(msg)
+            value = self.variables[var_name]
 
-        s = re.sub(LayerBasedResolver.VARIABLE_PATTERN, replace_var, value)
-        return self.attempt_additional_resolution(key, s)
+        return self.attempt_additional_resolution(key, value)
 
     def deep_resolve_variables(self, data, key=None):
         # Directly resolve if its a string or can be resolved by an additional resolver
@@ -139,10 +139,7 @@ class LayerBasedResolver:
             return self.resolve_variable(data, key=key)
 
         if isinstance(data, dict):
-            return {
-                k: self.deep_resolve_variables(v, key=k)
-                for k, v in data.items()
-            }
+            return {k: self.deep_resolve_variables(v, key=k) for k, v in data.items()}
 
         if isinstance(data, list):
             return [self.deep_resolve_variables(item, key=None) for item in data]

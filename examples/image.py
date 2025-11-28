@@ -14,7 +14,7 @@ background = ImageElement(
     width=width,
     height=height,
 )
-background.apply_operation(apply_hue_shift, degrees=30)
+apply_hue_shift(background, 30)
 # or apply_hue_shift(background, 30)
 
 canvas.add_element("background", background)

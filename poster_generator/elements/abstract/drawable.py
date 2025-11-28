@@ -80,7 +80,7 @@ class DrawableElement(ABC):
         eps = 1e-5
         return self.overlaps_region(x, y, x + eps, y + eps)
 
-    def apply_operation(self, operation, **kwargs):
+    def apply_operation(self, operation, kwargs):
         """
         Apply a transformation operation to the drawable element.
 

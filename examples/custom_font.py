@@ -43,7 +43,7 @@ special_text = TextElement(
     max_width=128,
     text_alignment="center"
 )
-special_text.apply_operation(randomize_text_color)
+randomize_text_color(special_text)
 canvas.add_element("special_text", special_text)
 special_text.update_position((random_text.position[0], random_text.position[1] + 64))
 

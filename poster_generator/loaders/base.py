@@ -160,7 +160,7 @@ class BaseCanvasLoader(ABC):
         operations = element_info.get("operations", {})
         factory = get_operation_factory()
 
-        for op_name, op_params in operations.items():
+        for op_name, op_kwargs in operations.items():
             op_entry = factory.get_operation(op_name)
             if op_entry is None:
                 logger.warning("For element %s, operation '%s' not found in factory. Skipping.", element_id, op_name)
@@ -175,7 +175,7 @@ class BaseCanvasLoader(ABC):
                 )
                 continue
 
-            element.apply_operation(op_entry["func"], params=op_params)
+            element.apply_operation(op_entry["func"], kwargs=op_kwargs)
 
         return element
 

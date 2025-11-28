@@ -13,12 +13,12 @@ def ensure_rgba(image: Image) -> Image:
     return image
 
 
-def apply_hue_shift(image_el, degrees: int | None = None, **kwargs):
-    if degrees is None:
-        logger.warning("No degrees provided for hue shift operation; skipping.")
+def apply_hue_shift(element, degrees: int | None = None):
+    if not isinstance(degrees, int):
+        logger.warning("Degrees must be an integer for apply_hue_shift operation; skipping.")
         return
 
-    image = image_el.image
+    image = element.image
     hsv = ensure_rgba(image).convert("HSV")
 
     h, s, v = hsv.split()
@@ -26,15 +26,15 @@ def apply_hue_shift(image_el, degrees: int | None = None, **kwargs):
 
     hsv = Image.merge("HSV", (hue_shift_pixels, s, v))
 
-    image_el.set_image(hsv.convert("RGBA"))
+    element.set_image(hsv.convert("RGBA"))
 
 
-def set_hue_from_hex(image_el, hex_color: str | None = None, **kwargs):
+def set_hue_from_hex(element, hex_color: str | None = None):
     if hex_color is None:
-        logger.warning("No hex color provided for set_hue_from_hex operation; skipping.")
+        logger.warning("No valid hex color provided for set_hue_from_hex operation; skipping.")
         return
 
-    image = image_el.image
+    image = element.image
 
     pixels = ensure_rgba(image).load()
     width, height = image.size
@@ -66,4 +66,4 @@ def set_hue_from_hex(image_el, hex_color: str | None = None, **kwargs):
                 a,
             )
 
-    image_el.set_image(image)
+    element.set_image(image)
