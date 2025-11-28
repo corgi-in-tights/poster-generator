@@ -9,7 +9,7 @@ TODO: Add output image
 
 ## Features
 
-	•	🧱 Element and layer system with blend settings leveraging [Pillow](https://python-pillow.org/)
+	•	🧱 Element and layer system with blend settings leveraging Pillow
 
 	•	🗂️ Canvas element querying, grouping, deserialization and composites
 
@@ -60,8 +60,7 @@ poetry install
 Check out the `examples/` directory for concrete examples and [TEMPLATES.md](https://github.com/corgi-in-tights/poster-generator/blob/main/TEMPLATES.md) for a reference on the in-built template format.
 
 
-
-## Advanced Usage
+## Reference
 
 ### Elements
 
@@ -150,7 +149,7 @@ specific = canvas.get_elements(
 
 There are a few other methods, mostly to do with drawing, removing elements, cropping, etc. I recommend taking a look to see if any are useful to you :)
 
-## Contributing and Issues
+## Contributing & Issues
 
 Contributions are welcome! Please feel free to submit a PR. I am open to significant design changes if they match the project's intention.
 
