@@ -15,7 +15,7 @@ class CompositeElementMixin(ABC):
         return False
 
     @abstractmethod
-    def get_composite_params(self) -> dict:
+    def get_composite_params(self, opacity_modifier=1.0) -> dict:
         """
         List of parameters required for alpha compositing.
         Returns:
@@ -27,7 +27,8 @@ class CompositeElementMixin(ABC):
     def draw(self, image_draw: ImageDraw.Draw, image: Image.Image, blend_settings: dict | None = None) -> None:
         opacity_modifier = (blend_settings or {}).get("opacity", 1.0)
 
-        composite_params = self.get_composite_params()
+        opacity_modifier = (blend_settings or {}).get("opacity", 1.0)
+        composite_params = self.get_composite_params(opacity_modifier=opacity_modifier)
         for params in composite_params:
             if opacity_modifier < 1.0 or params.get("has_alpha", True):
                 self.apply_alpha_composites(image, params=params, opacity_modifier=opacity_modifier)
@@ -59,7 +60,7 @@ class CompositeElementMixin(ABC):
             overlay_image (PIL.Image): The overlay image with alpha channel.
             position (tuple): (x, y) position where the overlay will be placed on the base image.
         """
-        alpha_image = Image.new("RGBA", base_image.size, (255, 255, 255, 1-int(255 * opacity_modifier)))
+        alpha_image = Image.new("RGBA", base_image.size, (255, 255, 255, 255-int(255 * opacity_modifier)))
         image_draw = ImageDraw.Draw(alpha_image, "RGBA")
         self.draw_composite(image_draw, base_image, **params)
         base_image.alpha_composite(alpha_image)

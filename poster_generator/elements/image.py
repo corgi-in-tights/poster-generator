@@ -28,7 +28,7 @@ class ImageElement(DrawableElement):
         True
     """
 
-    def __init__(self, *, image_path=None, position=(0, 0), width=None, height=None):
+    def __init__(self, *, image_path=None, position=(0, 0), width=None, height=None, opacity=1.0):
         """Initialize an ImageElement with position and optional dimensions.
 
         Args:
@@ -41,6 +41,7 @@ class ImageElement(DrawableElement):
         self.width = width
         self.height = height
         self.image = None
+        self.opacity = opacity
 
         if image_path is not None:
             self.set_image_path(image_path)
@@ -95,6 +96,12 @@ class ImageElement(DrawableElement):
             raise ValueError(msg)
 
         out = self.image.split()
+
+        self.opacity *= (blend_settings or {}).get("opacity", 1.0)
+        if self.opacity < 1.0:
+            alpha = out[3].point(lambda p: int(p * self.opacity))
+            out = (*out[:3], alpha)
+
         canvas_image.paste(self.image, (*self.position, *pos2), out[3])
 
     def is_ready(self):

@@ -150,3 +150,11 @@ class DrawableElement(ABC):
             DrawableElement: A new instance that is a copy of this element.
         """
         return copy.deepcopy(self)
+
+
+    def apply_opacity_modifier(self, color: tuple, opacity_modifier: float):
+        if color is not None:
+            r, g, b, a = color
+            a = int(a * opacity_modifier)
+            return (r, g, b, a)
+        return color

@@ -17,7 +17,7 @@ def test_text_element_initialization():
     assert elem.position == (100, 50)
     assert elem.text == "Hello World"
     assert elem.font_size == 24
-    assert elem.fill == "#000000"
+    assert elem.fill == (0, 0, 0, 255)
 
 
 def test_text_element_is_ready_when_all_required_set():
@@ -70,7 +70,7 @@ def test_text_element_draw():
     """Test that TextElement.draw() renders text to image."""
     elem = TextElement(position=(50, 50), text="Test", font_family="Open Sans", font_size=20, fill="#FF0000")
 
-    img = Image.new("RGB", (200, 200), "#FFFFFF")
+    img = Image.new("RGBA", (200, 200), "#FFFFFF")
     draw_ctx = ImageDraw.Draw(img)
 
     elem.draw(draw_ctx, img)
@@ -80,7 +80,7 @@ def test_text_element_draw():
     pixels_changed = False
     for x in range(50, 100):
         for y in range(50, 70):
-            if img.getpixel((x, y)) != (255, 255, 255):
+            if img.getpixel((x, y)) != (255, 255, 255, 255):
                 pixels_changed = True
                 break
         if pixels_changed:
@@ -180,7 +180,7 @@ def test_rectangle_element_initialization():
     assert elem.position == (100, 50)
     assert elem.width == 200
     assert elem.height == 150
-    assert elem.fill == "#FF0000"
+    assert elem.fill == (255, 0, 0, 255)
 
 
 def test_rectangle_element_is_ready():
@@ -267,7 +267,7 @@ def test_ellipse_element_initialization():
     assert elem.position == (100, 50)
     assert elem.width == 50
     assert elem.height == 50
-    assert elem.fill == "#FF0000"
+    assert elem.fill == (255, 0, 0, 255)
 
 
 def test_ellipse_element_is_ready():

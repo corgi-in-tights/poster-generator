@@ -1,13 +1,12 @@
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+
+from PIL import Image, ImageDraw
 
 from poster_generator.elements.abstract import DrawableElement
+from poster_generator.utils import normalize_color
 
 from .fonts import get_font_manager
-
-if TYPE_CHECKING:
-    from PIL import ImageDraw
 
 DEFAULT_FONT = Path(__file__).parent.parent / "resources/fonts/open_sans.ttf"
 
@@ -79,7 +78,7 @@ class TextElement(DrawableElement):
         self.font_size = font_size
         self.max_width = max_width
         self.wrap_style = wrap_style
-        self.fill = fill
+        self.fill = normalize_color(fill)
         self.text_alignment = text_alignment
 
         self.set_font(font_family, font_size)
@@ -181,7 +180,7 @@ class TextElement(DrawableElement):
 
         return (width, height*1.5)
 
-    def draw(self, draw: "ImageDraw.Draw", _, blend_settings: dict | None = None):
+    def draw(self, image_draw: "ImageDraw.Draw", image, blend_settings: dict | None = None):
         """
         Draw the text onto the canvas.
 
@@ -196,7 +195,16 @@ class TextElement(DrawableElement):
         if self.position is None:
             msg = "No position specified for TextElement drawing."
             raise ValueError(msg)
-        draw.text(self.position, self.text, font=self.font, fill=self.fill, align=self.text_alignment)
+
+        opacity_modifier = (blend_settings or {}).get("opacity", 1.0)
+        self.fill = self.apply_opacity_modifier(self.fill, opacity_modifier)
+
+        alpha_image = Image.new("RGBA", image.size, (255, 255, 255, 0))
+        image_draw = ImageDraw.Draw(alpha_image, "RGBA")
+
+        image_draw.text(self.position, self.text, font=self.font, fill=self.fill, align=self.text_alignment)
+
+        image.alpha_composite(alpha_image)
 
     def is_ready(self):
         """

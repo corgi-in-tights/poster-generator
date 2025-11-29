@@ -24,9 +24,10 @@ text_element = TextElement(
     position=(100, height//2 - 64),
     text="This time, with a background!",
     font_size=64,
-    fill="#333333",
+    fill="#574848",
 )
-canvas.add_element("title", text_element)
+canvas.add_layer("texts", {"opacity": 0.5})
+canvas.add_element("title", text_element, layer="texts")
 
 
 image = canvas.render()

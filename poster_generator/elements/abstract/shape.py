@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC
 
 from poster_generator.elements.mixins import CompositeElementMixin
+from poster_generator.utils import normalize_color
 
 from .drawable import DrawableElement
 
@@ -21,11 +22,11 @@ class ShapeElement(CompositeElementMixin, DrawableElement, ABC):
         super().__init__(**kwargs)
         self.width = int(width) if width is not None else None
         self.height = int(height) if height is not None else None
-        self.fill = fill
-        self.outline = outline
+        self.fill = normalize_color(fill)
+        self.outline = normalize_color(outline)
         self.outline_width = outline_width
 
-    def get_composite_params(self):
+    def get_composite_params(self, opacity_modifier=1.0) -> list[dict]:
         params = []
         should_alpha_fill = self.fill and self.should_alpha_composite(self.fill)
         should_alpha_outline = self.should_alpha_composite(self.outline)
@@ -34,8 +35,8 @@ class ShapeElement(CompositeElementMixin, DrawableElement, ABC):
             params.append(
                 {
                     "has_alpha": False,
-                    "fill": self.fill,
-                    "outline": self.outline,
+                    "fill": self.apply_opacity_modifier(self.fill, opacity_modifier),
+                    "outline": self.apply_opacity_modifier(self.outline, opacity_modifier),
                     "outline_width": self.outline_width,
                 },
             )

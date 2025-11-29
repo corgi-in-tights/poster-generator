@@ -41,7 +41,7 @@ special_text = TextElement(
     fill="#5E174D",
     font_family="Super Feel",
     max_width=128,
-    text_alignment="center"
+    text_alignment="center",
 )
 randomize_text_color(special_text)
 canvas.add_element("special_text", special_text)
