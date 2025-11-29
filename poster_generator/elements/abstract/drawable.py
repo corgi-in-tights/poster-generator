@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
 
     from poster_generator.canvas import Canvas
 
+logger = logging.getLogger(__name__)
 
 class DrawableElement(ABC):
     """Abstract base class for all drawable elements in a poster.
@@ -105,6 +107,7 @@ class DrawableElement(ABC):
         Args:
             position: New position to set for the drawable element.
         """
+        logger.debug("Updating position from %s to %s", self.position, position)
         if position is not None:
             self.position = position
 

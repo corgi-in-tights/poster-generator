@@ -53,6 +53,8 @@ class BaseCanvasLoader(ABC):
 
         elements = deserialized_info.get("elements", {})
         for element_id, element_info in elements.items():
+            logger.debug("Building element '%s' of type '%s'.", element_id, element_info.get("type"))
+
             element_info = self.pre_build_element(element_id, element_info, canvas, deserialized_info)  # noqa: PLW2901
             if element_info is None:
                 logger.debug("Element %s skipped by pre_build_element hook.", element_id)
@@ -63,6 +65,8 @@ class BaseCanvasLoader(ABC):
 
             element = self.build_element(element_id, element_info)
             self.post_build_element(element_id, element, canvas, element_info, deserialized_info)
+            logger.debug("Adding element '%s' to canvas on layer '%s'.", element_id, layer)
+
             canvas.add_element(element_id, element, layer=layer, groups=groups)
 
         self.post_build_canvas(canvas, deserialized_info)
@@ -121,7 +125,11 @@ class BaseCanvasLoader(ABC):
         """
 
     def pre_build_element(
-        self, element_id: str, element_info: dict, canvas: Canvas, deserialized_info: dict,
+        self,
+        element_id: str,
+        element_info: dict,
+        canvas: Canvas,
+        deserialized_info: dict,
     ) -> dict | None:
         """
         Hook for pre-processing element info before building the element.
@@ -175,12 +183,18 @@ class BaseCanvasLoader(ABC):
                 )
                 continue
 
+            logger.debug("Applying operation '%s' to element '%s'.", op_name, element_id)
             element.apply_operation(op_entry["func"], kwargs=op_kwargs)
 
         return element
 
     def post_build_element(  # noqa: B027
-        self, element_id: str, element, canvas: Canvas, element_info: dict, deserialized_info: dict,
+        self,
+        element_id: str,
+        element,
+        canvas: Canvas,
+        element_info: dict,
+        deserialized_info: dict,
     ):
         """
         Hook for post-processing an element before it is added to the canvas.
@@ -194,7 +208,9 @@ class BaseCanvasLoader(ABC):
         """
 
     def post_build_canvas(  # noqa: B027
-        self, canvas: Canvas, deserialized_info: dict,
+        self,
+        canvas: Canvas,
+        deserialized_info: dict,
     ):
         """
         Hook for final processing after the canvas is fully built.

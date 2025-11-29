@@ -1,0 +1,93 @@
+schema: "1.0"
+settings:
+  width: 1080
+  height: 1350
+  background_color: "#fff"
+  
+layers:
+  background:
+    elements:
+      image_cover:
+        type: image
+        values:
+          image_path: "assets/kevin-mueller-unsplash.jpg"
+          width: 1080
+          height: 1350
+
+      border_panel:
+        type: rectangle
+        rel_position:
+          source: alignment
+          value:
+            x: center
+            y: center
+        values:
+          width: 880
+          height: 1150
+          outline: "#f0c897"
+          outline_width: 5
+          fill: [255, 255, 255, 45]
+          border_radius: 10
+
+  text: 
+    elements:
+      title1:
+        type: text
+        rel_position:
+          source: alignment
+          value:
+            x: center
+            y: 50%
+        values:
+          text: --${title_text}--
+          font_size: 130
+          max_width: 400
+          text_alignment: center
+          font_family: "Bebas Neue Regular"
+          fill: "#FFFFFF"
+
+      tagline:
+        type: text
+        rel_position:
+          source: alignment
+          value:
+            x: center
+            y: 15%
+          parent: border_panel
+        values:
+          text: I was born to be flexible!
+          font_size: 70
+          max_width: 800
+          text_alignment: center
+          font_family: "Bebas Neue Regular"
+          fill: "#f0c897"
+
+      tagline2:
+        type: text
+        rel_position:
+          source: alignment
+          value:
+            x: center
+            y: 80%
+          parent: border_panel
+        values:
+          text: Buy one, get three free, maybe four.
+          font_size: 60
+          max_width: 800
+          text_alignment: center
+          font_family: "Bebas Neue Regular"
+          fill: "#f0c897"
+
+      contact:
+        type: text
+        rel_position:
+          source: element
+          value: tagline2
+          offset:
+            y: 80
+        values:
+          text: "https://github.com/corgi-in-tights/poster-generator"
+          font_size: 40
+          font_family: "Bebas Neue Regular"
+          fill: "#fff"
+

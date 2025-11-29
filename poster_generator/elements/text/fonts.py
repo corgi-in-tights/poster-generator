@@ -6,8 +6,10 @@ from PIL import ImageFont
 
 logger = logging.getLogger(__name__)
 
+ROOT_DIR = Path(__file__).parent.parent.parent
+
 class FontManager:
-    DEFAULT_FONT_PATH = Path(__file__).parent.parent.parent / "resources/fonts/open_sans.ttf"
+    DEFAULT_FONT_PATH = ROOT_DIR / "resources/fonts/open_sans.ttf"
 
     def __init__(self):
         self.font_families = {}
@@ -18,6 +20,8 @@ class FontManager:
 
     def _register_inbuilt_fonts(self):
         self.register_font_family("Open Sans", FontManager.DEFAULT_FONT_PATH)
+        self.register_font_family("Bebas Neue Regular", ROOT_DIR / "resources/fonts/bebas_neue_regular.ttf",
+                                  alternate_names=["Bebas Neue"])
 
     def _register_system_fonts(self):
         """Register system-installed font families."""
@@ -51,14 +55,17 @@ class FontManager:
         logger.info("Registered %d system font families.", len(self.font_families))
         logger.debug("Font families: %s", list(self.font_families.keys()))
 
-    def register_font_family(self, family_name: str, font_path: str | Path):
+    def register_font_family(self, family_name: str, font_path: str | Path, alternate_names: list[str] | None = None):
         """Register a new font family.
 
         Args:
             family_name (str): Name of the font family.
             font_path (str or Path): Path to the TrueType font file.
         """
-        self.font_families[family_name] = Path(font_path)
+        self.font_families[family_name.lower()] = Path(font_path)
+        if alternate_names:
+            for alt_name in alternate_names:
+                self.font_families[alt_name.lower()] = Path(font_path)
 
     def get_font(self, family_name: str, font_size: int):
         """Retrieve a font from the cache or load it if not cached.
@@ -70,7 +77,11 @@ class FontManager:
         Returns:
             ImageFont.FreeTypeFont: Loaded font object.
         """
-        font_path = self.font_families.get(family_name)
+        if family_name is None:
+            msg = "Font family name cannot be None, given: ", family_name
+            raise ValueError(msg)
+
+        font_path = self.font_families.get(family_name.lower())
         if font_path is None:
             logger.warning("Font family '%s' not found. Using default font.", family_name)
             font_path = FontManager.DEFAULT_FONT_PATH

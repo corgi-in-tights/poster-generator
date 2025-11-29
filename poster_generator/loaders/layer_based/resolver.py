@@ -82,6 +82,8 @@ class ColorResolver:
 
     def resolve(self, field_name, field_value):
         if isinstance(field_value, str):
+            if field_value in {"none", "transparent"}:
+                return None
             return field_value  # Assume hex string is fine as is
         if isinstance(field_value, list) and len(field_value) in (3, 4):
             return tuple(field_value)

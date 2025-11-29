@@ -16,6 +16,7 @@ FONT_FAMILIES = {
 
 logger = logging.getLogger(__name__)
 
+
 class TextElement(DrawableElement):
     """A drawable text element with support for wrapping, alignment, and font caching.
 
@@ -47,6 +48,7 @@ class TextElement(DrawableElement):
         ... )
         >>> my_text.set_text("New text content")
     """
+
     def __init__(  # noqa: PLR0913
         self,
         *,
@@ -81,6 +83,10 @@ class TextElement(DrawableElement):
         self.fill = normalize_color(fill)
         self.text_alignment = text_alignment
 
+        # before calculations
+        self.width = 0
+        self.height = 0
+
         self.set_font(font_family, font_size)
         self.set_text(text)
 
@@ -104,13 +110,37 @@ class TextElement(DrawableElement):
         Args:
             t (str): The text content to set.
         """
-        self.text = self._wrap_text(t, self.max_width) if self.max_width else t
+        if t == "":
+            self.text = ""
+            self.width = 0
+            self.height = 0
+            return
 
-    def _wrap_text(self, text, max_width):
+        logger.debug("Setting text for TextElement: %s", t._identifier if hasattr(t, "_identifier") else t)  # noqa: SLF001
+        lines = self._wrap_text(t) if self.max_width else [t]
+
+        curr_width = 0
+        curr_height = 0
+
+        for li in lines:
+            w, h = self.font.getbbox(li)[2:]
+            curr_width = max(curr_width, w)
+            curr_height += h
+
+        self.text = "\n".join(lines)
+        logger.debug("Text set to: %s", self.text.replace("\n", "\\n"))
+        self.width = curr_width
+        self.height = curr_height
+
+    def _wrap_text(self, text):
         # It's easier to just test each case rather than try to do complex calculations
         # Not too computationally expensive for typical text sizes
-        if self.max_width is None or self.wrap_style is None or self.wrap_style == "none":
+        if self.wrap_style is None or self.wrap_style == "none":
             return text
+
+        logger.debug(
+            "Wrapping text for TextElement with max_width=%s and wrap_style=%s", self.max_width, self.wrap_style,
+        )
 
         # Choose tokens: words or chars
         if self.wrap_style == "char":
@@ -131,7 +161,7 @@ class TextElement(DrawableElement):
             test_line = joiner.join([*current, token])
             w = self.font.getlength(test_line)
 
-            if w <= max_width or not current:
+            if w <= self.max_width or not current:
                 current.append(token)
             else:
                 # commit line
@@ -141,9 +171,11 @@ class TextElement(DrawableElement):
         if current:
             lines.append(joiner.join(current))
 
-        return "\n".join(lines)
+        logger.debug("Wrapped text lines: %s", lines)
 
-    def _wrap_text_char(self, text, max_width):
+        return lines
+
+    def _wrap_text_char(self, text):
         lines = []
         current = ""
 
@@ -151,7 +183,7 @@ class TextElement(DrawableElement):
             test_line = current + char
             w = self.font.getlength(test_line)
 
-            if w <= max_width or not current:
+            if w <= self.max_width or not current:
                 current += char
             else:
                 # Break line
@@ -170,15 +202,10 @@ class TextElement(DrawableElement):
         Returns:
             (width, height): Tuple of width and height in pixels.
         """
-        if not self.text:
+        if not self.text or self.font is None:
             return (0, 0)
 
-        # equal to (left, top, right, bottom)
-        bbox = self.font.getbbox(self.text)
-        width = bbox[2] - bbox[0]
-        height = bbox[3] - bbox[1]
-
-        return (width, height*1.5)
+        return (self.width, self.height)
 
     def draw(self, image_draw: "ImageDraw.Draw", image, blend_settings: dict | None = None):
         """
@@ -223,4 +250,3 @@ class TextElement(DrawableElement):
             or y2 < self.position[1]
             or y1 > self.position[1] + height
         )
-
