@@ -2,7 +2,8 @@
 
 A flexible Python library for building and rendering posters/infomatics with focus on text templates and dynamic usage.
 
-TODO: Add output image
+![Poster Generator Banner](https://raw.githubusercontent.com/corgi-in-tights/poster-generator/main/docs/images/showcase.png)
+
 
 [![Python Version](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
