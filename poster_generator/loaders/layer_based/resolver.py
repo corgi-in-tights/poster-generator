@@ -4,6 +4,11 @@ from poster_generator.exceptions import VariableNotDefinedError
 
 
 class PointResolver:
+    """
+    Resolver for point-like fields such as positions and offsets.
+    Supports multiple input formats: strings, lists, and dictionaries.
+    """
+
     POINT_DIMENSIONS = 2
 
     def should_resolve(self, field_name):
@@ -77,6 +82,11 @@ class PointResolver:
 
 
 class ColorResolver:
+    """
+    Resolver for color fields.
+    Supports multiple input formats: hex strings, RGB/RGBA tuples, and dictionaries.
+    """
+
     def should_resolve(self, field_name):
         return field_name in ("background", "fill", "outline", "color")
 
@@ -98,6 +108,10 @@ class ColorResolver:
 
 
 class LayerBasedResolver:
+    """
+    Resolver for variables and additional field types in layer-based canvas configurations.
+    Supports variable substitution and additional resolvers for specific field types."""
+
     VARIABLE_PATTERN = r"--\$\{([^}]+)\}--"
 
     def __init__(self, variables, additional_resolvers=None):
@@ -118,6 +132,15 @@ class LayerBasedResolver:
         return field_value
 
     def resolve_variable(self, value, key=None):
+        """Resolve a variable in the given value string, usually to substitute variables or refactor.
+
+        Args:
+            value (str): The string potentially containing a variable to resolve.
+            key (str): The field name associated with the value, for additional resolution.
+
+        Returns:
+            The resolved value, with the first variable substituted and additional resolution applied.
+        """
         if not isinstance(value, str):
             return self.attempt_additional_resolution(key, value)
 
@@ -132,6 +155,15 @@ class LayerBasedResolver:
         return self.attempt_additional_resolution(key, value)
 
     def deep_resolve_variables(self, data, key=None):
+        """Recursively resolve variables in the given data structure.
+
+        Args:
+            data: The data structure (str, dict, list, etc.) to resolve variables in.
+            key: The field name associated with the data, for additional resolution.
+
+        Returns:
+            The data structure with all variables resolved.
+        """
         # Directly resolve if its a string or can be resolved by an additional resolver
         matches_any_resolver = False
         for resolver in self.additional_resolvers:

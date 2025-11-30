@@ -35,7 +35,7 @@ class Canvas:
         height: Canvas height in pixels.
         background: Background color.
         elements: Dictionary mapping element identifiers to element instances.
-        layers: Dictionary of layers, each containing settings and element lists.
+        layers: Dictionary of layers, each containing a settings dict and list of element identifiers.
         groups: Dictionary of groups, each containing a set of element identifiers.
     """
 

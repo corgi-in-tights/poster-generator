@@ -7,13 +7,29 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
+
 def ensure_rgba(image: Image) -> Image:
+    """Ensure the image is in RGBA mode.
+
+    Args:
+        image (PIL.Image): The input image.
+
+    Returns:
+        PIL.Image: The image converted to RGBA mode if it was not already.
+    """
     if image.mode != "RGBA":
         return image.convert("RGBA")
     return image
 
 
-def apply_hue_shift(element, degrees: int | None = None):
+def apply_hue_shift(element, degrees: int | None = None) -> None:
+    """
+    Apply a hue shift to the image element by the specified degrees.
+
+    Args:
+        element: The image element to modify.
+        degrees (int): Degrees to shift the hue (0-360).
+    """
     if not isinstance(degrees, int):
         logger.warning("Degrees must be an integer for apply_hue_shift operation; skipping.")
         return
@@ -29,7 +45,14 @@ def apply_hue_shift(element, degrees: int | None = None):
     element.set_image(hsv.convert("RGBA"))
 
 
-def set_hue_from_hex(element, hex_color: str | None = None):
+def set_hue_from_hex(element, hex_color: str | None = None) -> None:
+    """
+    Set the hue of the image element based on the provided hex color.
+
+    Args:
+        element: The image element to modify.
+        hex_color (str): Hex color string (e.g., "#RRGGBB").
+    """
     if hex_color is None:
         logger.warning("No valid hex color provided for set_hue_from_hex operation; skipping.")
         return

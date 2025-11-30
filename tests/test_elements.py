@@ -15,7 +15,7 @@ def test_text_element_initialization():
     elem = TextElement(position=(100, 50), text="Hello World", font_family="Open Sans", font_size=24, fill="#000000")
 
     assert elem.position == (100, 50)
-    assert elem.text == "Hello World"
+    assert elem.text_content == "Hello World"
     assert elem.font_size == 24
     assert elem.fill == (0, 0, 0, 255)
 
@@ -95,7 +95,7 @@ def test_text_element_set_text():
 
     original_size = elem.get_size()
 
-    elem.set_text("Much longer text string here")
+    elem.set_text_content("Much longer text string here")
     new_size = elem.get_size()
 
     # Width should increase with longer text
@@ -356,7 +356,7 @@ def test_factory_create_text_element():
 
     assert isinstance(elem, TextElement)
     assert elem.position == (10, 20)
-    assert elem.text == "Test"
+    assert elem.text_content == "Test"
 
 
 def test_factory_create_rectangle_element():

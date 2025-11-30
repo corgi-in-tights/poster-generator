@@ -1,6 +1,5 @@
 """Rectangle element implementation for rendering filled rectangles on canvas."""
 
-
 from .abstract import ShapeElement
 
 
@@ -11,19 +10,14 @@ class RectangleElement(ShapeElement):
     specified by a radius parameter. Supports both fill and outline colors.
 
     Attributes:
-        width (int): Rectangle width in pixels.
-        height (int): Rectangle height in pixels.
-        fill (str): Fill color as hex string (e.g., "#FF5733").
-        outline (str or None): Outline color as hex string, or None for no outline.
-        outline_width (int): Width of the outline in pixels.
-        radius (int): Corner radius in pixels for rounded corners (0 for sharp corners).
+        border_radius (int): Corner radius in pixels for rounded corners (0 for sharp corners).
 
     Example:
         >>> rect = RectangleElement(
         ...     position=(100, 100),
         ...     width=300,
         ...     height=200,
-        ...     fill="#FF5733"
+        ...     fill=(1.0, 0.34, 0.2, 1.0)
         ... )
         >>>
         >>> rounded_rect = RectangleElement(
@@ -33,7 +27,7 @@ class RectangleElement(ShapeElement):
         ...     fill="#3498db",
         ...     outline="#2c3e50",
         ...     outline_width=3,
-        ...     radius=20
+        ...     border_radius=20
         ... )
     """
 
@@ -44,6 +38,16 @@ class RectangleElement(ShapeElement):
         other_position=None,
         **kwargs,
     ):
+        """
+        Initialize a Rectangle element.
+
+        Args:
+            border_radius (int, optional): The radius of the rectangle's corners. Defaults to 0.
+            other_position (tuple, optional): An alternative position (x, y) to calculate width and height
+                from the base position. If provided, width and height are computed as the absolute difference
+                between other_position and self.position. Defaults to None.
+            **kwargs: Additional keyword arguments passed to the ShapeElement constructor.
+        """
         super().__init__(**kwargs)
         if other_position is not None:
             self.width = abs(other_position[0] - self.position[0])
@@ -68,7 +72,10 @@ class RectangleElement(ShapeElement):
             )
         else:  # Draw regular rectangle
             image_draw.rectangle(
-                [(x, y), (x2, y2)], fill=fill, outline=outline, width=outline_width,
+                [(x, y), (x2, y2)],
+                fill=fill,
+                outline=outline,
+                width=outline_width,
             )
 
     def is_ready(self) -> bool:
@@ -79,5 +86,3 @@ class RectangleElement(ShapeElement):
             bool: True if position, width, and height are set.
         """
         return self.position is not None and self.width is not None and self.height is not None
-
-

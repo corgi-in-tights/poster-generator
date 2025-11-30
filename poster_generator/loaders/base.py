@@ -19,7 +19,6 @@ class BaseCanvasLoader(ABC):
         - deserialize(): Converts raw data to normalized canvas configuration
 
     Subclasses may optionally override:
-        - preprocess(): Transform raw data before deserialization
         - pre_build_element(): Modify element info before building
         - post_build_element(): Process element after building, before adding to canvas
         - post_build_canvas(): Final processing after canvas is fully built

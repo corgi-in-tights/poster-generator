@@ -28,16 +28,16 @@ class ImageElement(DrawableElement):
         True
     """
 
-    def __init__(self, *, image_path=None, position=(0, 0), width=None, height=None, opacity=1.0):
+    def __init__(self, *, image_path=None, width=None, height=None, opacity=1.0, **kwargs):
         """Initialize an ImageElement with position and optional dimensions.
 
         Args:
-            position (tuple): The (x, y) coordinates of the image's top-left corner.
             image_path (str): Path to the image file to be loaded.
             width (int, optional): The desired width of the image. If None, uses original width. Defaults to None.
             height (int, optional): The desired height of the image. If None, uses original height. Defaults to None.
+            **kwargs: Additional keyword arguments passed to the DrawableElement constructor.
         """
-        super().__init__(position)
+        super().__init__( **kwargs)
         self.width = width
         self.height = height
         self.image = None

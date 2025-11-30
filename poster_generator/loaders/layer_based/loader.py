@@ -13,6 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 class LayerBasedLoader(BaseCanvasLoader, ABC):
+    """
+    A loader for canvas configurations based on layered structures (YAML/JSON), i.e.
+    hierarchical layers containing elements with relative positioning.
+
+    This loader implements deserialization logic for layered canvas configurations,
+    supporting settings, anchors, layers, and elements with relative positioning.
+    """
+
     SCHEMA_VERSION = "1.0"
 
     def deserialize(self, data: dict, variables: dict) -> Canvas:

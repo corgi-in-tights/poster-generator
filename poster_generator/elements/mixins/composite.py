@@ -7,7 +7,13 @@ from PIL import Image, ImageDraw
 MAX_ALPHA = 255
 ALPHA_INDEX = 3
 
+
 class CompositeElementMixin(ABC):
+    """
+    Mixin class to ease the implementation of adding opacity and alpha compositing
+    support to drawable elements.
+    """
+
     def should_alpha_composite(self, color) -> bool:
         if isinstance(color, tuple) and len(color) == ALPHA_INDEX + 1:
             if color[ALPHA_INDEX] < MAX_ALPHA:
@@ -19,9 +25,8 @@ class CompositeElementMixin(ABC):
         """
         List of parameters required for alpha compositing.
         Returns:
-            list:
-                Each value in the returned list is a dictionary consisting of the
-                kwargs passed to the composite function.
+            list: Each value in the returned list is a dictionary consisting of the
+                  kwargs passed to the draw_composite function.
         """
 
     def draw(self, image_draw: ImageDraw.Draw, image: Image.Image, blend_settings: dict | None = None) -> None:
@@ -60,7 +65,7 @@ class CompositeElementMixin(ABC):
             overlay_image (PIL.Image): The overlay image with alpha channel.
             position (tuple): (x, y) position where the overlay will be placed on the base image.
         """
-        alpha_image = Image.new("RGBA", base_image.size, (255, 255, 255, 255-int(255 * opacity_modifier)))
+        alpha_image = Image.new("RGBA", base_image.size, (255, 255, 255, 255 - int(255 * opacity_modifier)))
         image_draw = ImageDraw.Draw(alpha_image, "RGBA")
         self.draw_composite(image_draw, base_image, **params)
         base_image.alpha_composite(alpha_image)

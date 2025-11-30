@@ -7,14 +7,6 @@ class EllipseElement(ShapeElement):
     """A drawable ellipse element with support for fill and outline colors.
 
     The ellipse is positioned by its top-left corner and sized by width and height.
-    Supports both fill and outline styling.
-
-    Attributes:
-        width (int): Ellipse width in pixels.
-        height (int): Ellipse height in pixels.
-        fill (str): fill color as hex string (e.g., "#FF5733").
-        outline (str or None): Outline color as hex string, or None for no outline.
-        outline_width (int): Width of the outline in pixels.
 
     Example:
         >>> # Simple filled ellipse

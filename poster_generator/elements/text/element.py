@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from PIL import Image, ImageDraw
 
@@ -8,34 +7,20 @@ from poster_generator.utils import normalize_color
 
 from .fonts import get_font_manager
 
-DEFAULT_FONT = Path(__file__).parent.parent / "resources/fonts/open_sans.ttf"
-
-FONT_FAMILIES = {
-    "Open Sans": DEFAULT_FONT,
-}
-
 logger = logging.getLogger(__name__)
 
 
 class TextElement(DrawableElement):
-    """A drawable text element with support for wrapping, alignment, and font caching.
-
-    This class extends DrawableElement to provide text rendering capabilities including
-    automatic text wrapping (word or character-based), text alignment (left, center, right),
-    font caching for performance optimization, and customizable font, size, and color.
-
-    Class Attributes:
-        font_cache (dict): Cache storing fonts by (font_path, font_size).
+    """A drawable text element with support for wrapping, alignment, and fonts.
 
     Attributes:
-        font_path (str): Path to the TrueType font file being used.
-        font_size (int): Size of the font in points.
-        max_width (int or None): Maximum width in pixels for text wrapping.
-        wrap_style (str): Text wrapping style - "word", "char", or "none".
-        fill (str): Text color in hex format (e.g., "#000000").
-        text_alignment (str): Text alignment style - "center", "left", or "right".
-        font (ImageFont.FreeTypeFont): PIL ImageFont object for rendering.
-        text (str): The actual text content, possibly wrapped.
+        font_size (int): The font size in points.
+        max_width (int): Maximum width for text wrapping.
+        wrap_style (str): Text wrapping style.
+        fill (str): Normalized color value for the text.
+        text_alignment (str): Text alignment style.
+        width (int): Calculated width of the text element (initialized to 0).
+        height (int): Calculated height of the text element (initialized to 0).
 
     Example:
         >>> my_text = TextElement(
@@ -43,10 +28,10 @@ class TextElement(DrawableElement):
         ...     text="Hello World",
         ...     font_size=24,
         ...     max_width=200,
-        ...     wrap_style="word",
-        ...     fill="#FF0000"
+        ...     fill="#FF0000",
+        ...     text_alignment="center"
         ... )
-        >>> my_text.set_text("New text content")
+        >>> my_text.set_text_content("New text content")
     """
 
     def __init__(  # noqa: PLR0913
@@ -61,23 +46,23 @@ class TextElement(DrawableElement):
         text_alignment="left",
         fill="#000",
     ):
-        """Initialize a TextElement with specified properties.
+        """
+        Initialize a text element with specified styling and positioning.
 
         Args:
-            position (tuple): The (x, y) coordinates for positioning the text element.
-            text (str, optional): The text content to display. Defaults to "".
-            font_path (str, optional):
-                Path to the font file. If None, uses DEFAULT_FONT. Defaults to None. Overrides font_family.
-            font_family (str, optional): Used to select from in-built fonts, library default (open sans).
-            font_size (int, optional): Size of the font in points. Defaults to 20.
-            max_width (int, optional):
-                Maximum width for text wrapping. If None, no wrapping is applied. Defaults to None.
-            wrap_style (str, optional): Style of text wrapping - "word", "char", or "none". Defaults to "word".
-            text_alignment (str, optional): Text alignment - "center", "left", or "right". Defaults to "left".
-            fill (str, optional): Text color in hex format (e.g., "#000000"). Defaults to "#000".
+            text (str): The text content to display. Defaults to "".
+            font_family (str): The font family name to use. Defaults to "Open Sans".
+            font_size (int): The size of the font in points. Defaults to 20.
+            max_width (int): Maximum width for text wrapping in pixels. Defaults to None.
+            wrap_style (str): The text wrapping style ("word" or "char"). Defaults to "word".
+            text_alignment (str):
+                Horizontal text alignment ("left", "center", or "right"). Defaults to "left".
+            fill (str | list | dict | None): The color of the text (hex, rgb, or color name). Defaults to "#000".
+            **kwargs: Additional keyword arguments passed to the DrawableElement constructor.
         """
         super().__init__(position)
         self.font_size = font_size
+        self.font_family = font_family
         self.max_width = max_width
         self.wrap_style = wrap_style
         self.fill = normalize_color(fill)
@@ -88,22 +73,23 @@ class TextElement(DrawableElement):
         self.height = 0
 
         self.set_font(font_family, font_size)
-        self.set_text(text)
+        self.set_text_content(text)
 
-    def set_font(self, font_family: str, size: int | None = None):
-        self.font = get_font_manager().get_font(font_family, size or self.font_size)
-
-    def set_font_size(self, font_size: int):
+    def set_font(self, font_family: str | None = None, size: int | None = None):
         """
-        Set the font size and update the font object.
+        Set the font family and size for the TextElement.
 
         Args:
-            font_size (int): The new font size in points.
+            font_family (str | None): The font family name to use. If None, uses current font family.
+            size (int | None): The size of the font in points. If None, uses current font size.
         """
-        self.font_size = font_size
-        self._reset_font(self.font_path)
+        self.font = get_font_manager().get_font(font_family or self.font.family, size or self.font_size)
+        if font_family is not None:
+            self.font_family = font_family
+        if size is not None:
+            self.font_size = size
 
-    def set_text(self, t: str):
+    def set_text_content(self, t: str):
         """
         Set the text content of the TextElement, applying wrapping if necessary.
 
@@ -111,7 +97,7 @@ class TextElement(DrawableElement):
             t (str): The text content to set.
         """
         if t == "":
-            self.text = ""
+            self.text_content = ""
             self.width = 0
             self.height = 0
             return
@@ -127,8 +113,8 @@ class TextElement(DrawableElement):
             curr_width = max(curr_width, w)
             curr_height += h
 
-        self.text = "\n".join(lines)
-        logger.debug("Text set to: %s", self.text.replace("\n", "\\n"))
+        self.text_content = "\n".join(lines)
+        logger.debug("Text set to: %s", self.text_content.replace("\n", "\\n"))
         self.width = curr_width
         self.height = curr_height
 
@@ -139,7 +125,9 @@ class TextElement(DrawableElement):
             return text
 
         logger.debug(
-            "Wrapping text for TextElement with max_width=%s and wrap_style=%s", self.max_width, self.wrap_style,
+            "Wrapping text for TextElement with max_width=%s and wrap_style=%s",
+            self.max_width,
+            self.wrap_style,
         )
 
         # Choose tokens: words or chars
@@ -202,7 +190,7 @@ class TextElement(DrawableElement):
         Returns:
             (width, height): Tuple of width and height in pixels.
         """
-        if not self.text or self.font is None:
+        if not self.text_content or self.font is None:
             return (0, 0)
 
         return (self.width, self.height)
@@ -229,7 +217,7 @@ class TextElement(DrawableElement):
         alpha_image = Image.new("RGBA", image.size, (255, 255, 255, 0))
         image_draw = ImageDraw.Draw(alpha_image, "RGBA")
 
-        image_draw.text(self.position, self.text, font=self.font, fill=self.fill, align=self.text_alignment)
+        image_draw.text(self.position, self.text_content, font=self.font, fill=self.fill, align=self.text_alignment)
 
         image.alpha_composite(alpha_image)
 
@@ -240,9 +228,18 @@ class TextElement(DrawableElement):
         Returns:
             bool: True if text and font are loaded.
         """
-        return self.font is not None and self.text is not None and self.text != ""
+        return self.font is not None and self.text_content is not None and self.text_content != ""
 
     def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
+        """
+        Check if this text element overlaps with a rectangular region.
+
+        Args:
+            x1 (float): Left edge of the query region.
+            y1 (float): Top edge of the query region.
+            x2 (float): Right edge of the query region.
+            y2 (float): Bottom edge of the query region.
+        """
         width, height = self.get_size()
         return not (
             x2 < self.position[0]

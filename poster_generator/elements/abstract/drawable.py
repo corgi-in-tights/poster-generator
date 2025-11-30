@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 class DrawableElement(ABC):
     """Abstract base class for all drawable elements in a poster.
 
@@ -22,14 +23,14 @@ class DrawableElement(ABC):
     readiness, detecting overlaps, and applying operations.
 
     Attributes:
-        position (tuple): The (x, y) coordinates of the element on the canvas.
+        position (tuple): The (x, y) coordinates of the element on the canvas, defaults to (0, 0).
     """
 
     def __init__(self, position=(0, 0)):
         """Initialize a DrawableElement with a position.
 
         Args:
-            position (tuple): The (x, y) coordinates for the element.
+            position (tuple): The (x, y) coordinates of the element on the canvas, defaults to (0, 0).
         """
         if position is None:
             self.position = (0, 0)
@@ -41,9 +42,8 @@ class DrawableElement(ABC):
         Bind the drawable element to a specific canvas. This should be called when
         the element is added to the canvas.
 
-        NOTE: This method breaks the previous connected canvas-element relationship
-        if called multiple times with different canvases and the values should only
-        be used when absolutely necessary.
+        NOTE: This method breaks the previous connected canvas-element relationship if called multiple
+        times with different canvases and the values should only be used when absolutely necessary or for debugging.
 
         Args:
             canvas (Canvas): The canvas to bind the element to.
@@ -54,15 +54,42 @@ class DrawableElement(ABC):
 
     @abstractmethod
     def draw(self, image_draw: ImageDraw.Draw, image: Image.Image, blend_settings: dict | None = None) -> None:
-        ...
+        """
+        Draw the element onto the image.
+
+        This method must be implemented by all subclasses to define how the element
+        should be rendered onto the image.
+
+        Args:
+            image_draw (ImageDraw.Draw): The ImageDraw object used for drawing operations.
+            image (Image.Image): The PIL Image object to draw on.
+            blend_settings (dict | None, optional): Dictionary containing blending settings
+                for the drawing operation. Defaults to None.
+        """
 
     @abstractmethod
     def is_ready(self) -> bool:
-        ...
+        """
+        Check if the drawable element is ready to be rendered.
+
+        Returns:
+            bool: True if the element is ready for rendering, otherwise False.
+        """
 
     @abstractmethod
     def overlaps_region(self, x1: float, y1: float, x2: float, y2: float) -> bool:
-        ...
+        """
+        Check if this drawable overlaps with a rectangular region.
+
+        Args:
+            x1 (float): The x-coordinate of the top-left corner of the region.
+            y1 (float): The y-coordinate of the top-left corner of the region.
+            x2 (float): The x-coordinate of the bottom-right corner of the region.
+            y2 (float): The y-coordinate of the bottom-right corner of the region.
+
+        Returns:
+            bool: True if the drawable overlaps with the region, otherwise False.
+        """
 
     def overlaps_at(self, x: float, y: float) -> bool:
         """
@@ -73,7 +100,7 @@ class DrawableElement(ABC):
             y (float): The y-coordinate of the point to check.
 
         Returns:
-            bool: True if the drawable overlaps with the point, False otherwise.
+            bool: True if the drawable overlaps with the point, otherwise False.
 
         Note:
             This method uses a small epsilon value (1e-5) to create a tiny region
@@ -126,8 +153,25 @@ class DrawableElement(ABC):
         x_align: float | None = None,
         y_align: float | None = None,
         parent_element: DrawableElement | str | None = None,
-        canvas = None,
+        canvas=None,
     ):
+        """
+        In-place position update on this element relative to a parent element or canvas.
+
+        Args:
+            x_align (float | None, optional): Horizontal alignment value between 0.0 (left) and 1.0 (right).
+                If None, the current x position is maintained. Defaults to None.
+            y_align (float | None, optional): Vertical alignment value between 0.0 (top) and 1.0 (bottom).
+                If None, the current y position is maintained. Defaults to None.
+            parent_element (DrawableElement | str | None, optional): The parent element to align to.
+                Can be a DrawableElement instance, a string identifier to look up the element,
+                or None to align to the canvas. Defaults to None.
+            canvas (optional): The canvas context to use for element lookups. If None, uses
+                the element's internal canvas reference. Defaults to None.
+
+        Raises:
+            ValueError: If parent_element is a string identifier that cannot be found in the bound canvas.
+        """
         canvas = canvas or self._canvas
         if isinstance(parent_element, str):
             parent_element = canvas.get_first_element(identifier=parent_element)
@@ -154,8 +198,17 @@ class DrawableElement(ABC):
         """
         return copy.deepcopy(self)
 
-
     def apply_opacity_modifier(self, color: tuple, opacity_modifier: float):
+        """
+        Helper to apply an opacity modifier to an RGBA color tuple.
+
+        Args:
+            color (tuple): The original RGBA color tuple.
+            opacity_modifier (float): The opacity modifier to apply (between 0.0 and 1.0).
+
+        Returns:
+            tuple: The modified RGBA color tuple with adjusted alpha.
+        """
         if color is not None:
             r, g, b, a = color
             a = int(a * opacity_modifier)

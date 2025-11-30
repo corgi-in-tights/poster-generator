@@ -6,7 +6,7 @@ RGBA_TUPLE_LENGTH = 4
 DEFAULT_ALPHA = 255
 
 
-def normalize_color(color_input):
+def normalize_color(color_input: str | tuple | dict | None) -> tuple | None:
     """
     Normalize a color input to an RGBA tuple.
 
@@ -39,9 +39,15 @@ def normalize_color(color_input):
         raise ValueError(msg)
 
     if isinstance(color_input, tuple) and (RGB_TUPLE_LENGTH <= len(color_input) <= RGBA_TUPLE_LENGTH):
-        if len(color_input) == RGB_TUPLE_LENGTH:
-            return (*color_input, DEFAULT_ALPHA)
-        return color_input
+        return color_input + (() if len(color_input) == RGBA_TUPLE_LENGTH else (DEFAULT_ALPHA,))
+
+    if isinstance(color_input, dict):
+        r = color_input.get("r") or color_input.get("red")
+        g = color_input.get("g") or color_input.get("green")
+        b = color_input.get("b") or color_input.get("blue")
+        a = color_input.get("a") or color_input.get("alpha", DEFAULT_ALPHA)
+        if r is not None and g is not None and b is not None:
+            return (r, g, b, a)
 
     msg = "Color input must be a hex string or an RGB/RGBA tuple"
     raise ValueError(msg)

@@ -9,6 +9,13 @@ logger = logging.getLogger(__name__)
 ROOT_DIR = Path(__file__).parent.parent.parent
 
 class FontManager:
+    """
+    Manages font families and provides methods to retrieve fonts.
+
+    Attributes:
+        font_families (dict): Mapping of font family names to their file paths.
+        font_cache (dict): Cache of loaded fonts to avoid redundant loading.
+    """
     DEFAULT_FONT_PATH = ROOT_DIR / "resources/fonts/open_sans.ttf"
 
     def __init__(self):
@@ -61,6 +68,7 @@ class FontManager:
         Args:
             family_name (str): Name of the font family.
             font_path (str or Path): Path to the TrueType font file.
+            alternate_names (list[str], optional): Alternate names for the font family. Defaults to None.
         """
         self.font_families[family_name.lower()] = Path(font_path)
         if alternate_names:
@@ -116,11 +124,12 @@ def get_font_manager() -> FontManager:
     """
     return _manager_instance
 
-def register_font_family(family_name: str, font_path: str | Path):
+def register_font_family(family_name: str, font_path: str | Path, alternate_names: list[str] | None = None):
     """Register a new font family in the global FontManager.
 
     Args:
         family_name (str): Name of the font family.
         font_path (str or Path): Path to the TrueType font file.
+        alternate_names (list[str], optional): Alternate names for the font family. Defaults to None.
     """
-    _manager_instance.register_font_family(family_name, font_path)
+    _manager_instance.register_font_family(family_name, font_path, alternate_names)
